@@ -21,7 +21,7 @@ class install(_install):
 if __name__ == '__main__':
     setup(
         name = 'tashtools',
-        version = '0.1.1',
+        version = '0.1.0',
         description = 'tools to access and massage 2p meso data ',
         long_description = '',
         author = 'Natalia Orlova',
