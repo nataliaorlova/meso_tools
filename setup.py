@@ -57,3 +57,16 @@ if __name__ == '__main__':
         python_requires = '',
         obsoletes = [],
     )
+
+
+via environment:
+PIP_TRUSTED_HOST=aibspi
+PIP_INDEX_URL=http://aibspi:3141/aibs/dev
+
+then
+pip install <package>
+
+
+OR
+
+pip install --trusted_host
