@@ -5,8 +5,10 @@ import numpy as np
 def to_uint16(path):
 	if ".tiff" in path :
 		data  = read_tiff(path)
-	if ".h5" in path:
+	elif ".h5" in path:
 		data = read_h5(path)
+	else:
+		raise ValueError('Input file has to be *.tiff or *.hdf5')
 
 	data_min = np.min(data)
 
