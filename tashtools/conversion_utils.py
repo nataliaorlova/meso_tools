@@ -19,6 +19,7 @@ def to_uint16(path):
 		raise ValueError('Conversion will truncate the data')
 	else:
 		data_uint16 = data.astype(np.uint16)
+	return data_uint16
 
 
 
