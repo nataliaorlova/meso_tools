@@ -2,7 +2,7 @@ from . import read_tiff, read_h5
 import numpy as np
 
 
-def to_uint16(path):
+def to_16bit(path):
 	if ".tiff" in path :
 		data  = read_tiff(path)
 	elif ".h5" in path:
@@ -18,10 +18,14 @@ def to_uint16(path):
 	data_max = np.max(data)
 
 	if data_max > 65355 :
-		raise ValueError('Conversion will truncate the data')
+		raise ValueError('Cancelling. Data needs to eb re-scaled first to avoid higher values truncation.')
 	else:
-		data_uint16 = data.astype(np.uint16)
-	return data_uint16
+		if data.dtype == np.float32 :
+			data_out = data.astype(np.float16)
+		elif data.dtype == np.int16 :
+			data_out = data.astype(np.uint16)
+	return data_out
+
 
 
 
