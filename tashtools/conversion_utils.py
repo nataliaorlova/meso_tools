@@ -3,7 +3,7 @@ import numpy as np
 
 
 def to_16bit(path):
-	if ".tiff" in path :
+	if ".tiff" or ".tif" in path:
 		data  = read_tiff(path)
 	elif ".h5" in path:
 		data = read_h5(path)
