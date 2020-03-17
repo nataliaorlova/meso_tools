@@ -12,9 +12,15 @@ def write_tiff(path, data):
     return
 
 
-def read_h5(path):
+def read_h5(path, field):
+    """
+    function to read a field form hdf5 file, wrapping h5py
+    :param path: path to hdf5 file
+    :param field: datafield to read
+    :return: raed data
+    """
     with h5py.File(path, "r") as f:
-        data = f["data"].value
+        data = f[field].value
     return data
 
 
