@@ -20,7 +20,7 @@ def read_h5(path, field):
     :return: raed data
     """
     with h5py.File(path, "r") as f:
-        data = f[field].value
+        data = f[field][()]
     return data
 
 
