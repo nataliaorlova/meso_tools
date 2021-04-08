@@ -3,7 +3,7 @@ import scipy.stats
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from skimage import io
-
+import tifffile as tiff
 
 CMAPS = ['Accent', 'Accent_r', 'Blues', 'Blues_r', 'BrBG', 'BrBG_r', 'BuGn', 'BuGn_r', 'BuPu', 'BuPu_r',
                  'CMRmap', 'CMRmap_r', 'Dark2', 'Dark2_r', 'GnBu', 'GnBu_r', 'Greens', 'Greens_r', 'Greys',
@@ -54,4 +54,19 @@ def plot_all_colormaps(im):
         plt.imshow(im, cmap = cm)
         plt.title(f'Colormap: {cm}')
         plt.close()
+    return
+
+def average_intensity(filepath):
+    """
+    Inputs the filepath of the lightleak.tiff file and outputs the average pixel value for each frame in the .tiff
+    """
+    im = tiff.imread(glob.glob(filepath))
+    intensity = []
+    for frame in range(len(im)):
+        x = im[frame].mean(axis=0)
+        x = x.mean(axis = 0)
+        intensity.append(x)
+    return np.array(intensity)
+
+def split_multichannel_data(image, channels):
     return
