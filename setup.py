@@ -20,21 +20,21 @@ class install(_install):
 
 if __name__ == '__main__':
     setup(
-        name = 'tashtools',
+        name = '2p_tools',
         version = '0.1.1',
-        description = 'tools to access and massage 2p meso data ',
+        description = 'tools to access and manipulate 2-photon data ',
         long_description = '',
         author = 'Natalia Orlova',
         author_email = 'nathali.orlova@gmail.com',
         license = '',
-        url = 'https://github.com/nataliaorlova/tashtools',
+        url = 'https://github.com/nataliaorlova/2p_tools',
         scripts = [],
         packages = [
-            'tashtools',
+            '2p_tools',
         ],
         namespace_packages = [],
         py_modules = [
-           # 'tashtools', <- these are single files
+           # '2p_tools', <- these are single files
 
         ],
         classifiers = [
@@ -52,6 +52,7 @@ if __name__ == '__main__':
             'numpy',
             'scipy',
             'matplotlib'
+            'skimage'
 
         ],
         dependency_links = [],

@@ -2,6 +2,8 @@ import tifffile
 import h5py
 
 
+
+
 def read_tiff(path):
     im = tifffile.imread(path)
     return im
@@ -28,4 +30,3 @@ def write_h5(path, h5_data):
     with h5py.File(path, 'w') as f:
         f.create_dataset('data', data=h5_data)
     return
-
