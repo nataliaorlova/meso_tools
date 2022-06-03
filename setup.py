@@ -20,17 +20,17 @@ class install(_install):
 
 if __name__ == '__main__':
     setup(
-        name = '2p_tools',
-        version = '0.1.1',
+        name = 'meso_tools',
+        version = '0.1.0',
         description = 'tools to access and manipulate 2-photon data ',
-        long_description = '',
+        long_description = 'Simple tools to load and process mesoscope data',
         author = 'Natalia Orlova',
         author_email = 'nathali.orlova@gmail.com',
         license = '',
-        url = 'https://github.com/nataliaorlova/2p_tools',
+        url = 'https://github.com/nataliaorlova/meso_tools',
         scripts = [],
         packages = [
-            '2p_tools',
+            'meso_tools',
         ],
         namespace_packages = [],
         py_modules = [
