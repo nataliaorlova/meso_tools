@@ -51,7 +51,7 @@ if __name__ == '__main__':
             'h5py',
             'numpy',
             'scipy',
-            'matplotlib'
+            'matplotlib',
             'skimage'
 
         ],
