@@ -1,3 +1,6 @@
+## this file definse functions to manipulate pixel data:
+### plot histograms, adjsut contrast, measure SNR, etc
+
 import numpy as np
 import scipy.stats
 import matplotlib.pyplot as plt

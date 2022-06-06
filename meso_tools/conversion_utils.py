@@ -1,3 +1,5 @@
+## this file has finctions to convert data
+
 import numpy as np
 
 def to_16bit(data):

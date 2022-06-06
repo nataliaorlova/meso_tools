@@ -1,3 +1,6 @@
+## this file has input/output related functions
+### reading/writing tiff, hdf5s, reading metadata
+
 import tifffile
 import h5py
 
