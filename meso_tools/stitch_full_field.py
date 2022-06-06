@@ -1,5 +1,10 @@
 # This file has the code needed to process large FOV stack:
-# 1. Asses that stack is of correct type, only channel 1 saving is enabled, all rois are in non-discrete plane mode
+# 1. Asses all following:
+#   a) stack is of correct type
+#   b) only channel 1 saving is enabled
+#   c) all rois are in non-discrete plane mode
+#   d) all rois are of the same pixel size (scaling would be too much work, plus we don't want to create a mess with resolution)
+
 # 2. Get all above values for the stack (num of planes, etc)
 # 3. Asses that tiff size is correct
 # 4. If multiple repeats of the stack (volumes) - average them out before stitching
@@ -12,7 +17,10 @@
 #               Get roi’s pixel size, and location
 #               Get portion of the tiff to insert, inset to location in destination file
 
+from matplotlib import path
 from meso_tools.io_utils import read_si_metadata as get_meta
+from meso_tools.io_utils import read_tiff
+
 import numpy as np
 
 def read_full_field_meta(metadata):
@@ -36,7 +44,7 @@ def read_full_field_meta(metadata):
     meta_dict['rois'] = metadata[1]['RoiGroups']['imagingRoiGroup']['rois']
     return meta_dict
 
-def check_stack(meta_dict):
+def check_meta(meta_dict):
     """
     assesions to check if the stakc is of correct type:
     1. Unifrom, non-centered
@@ -52,22 +60,36 @@ def check_stack(meta_dict):
     
     return
 
+def check_tiff(tiff_array, meta):
+    """
+    calculate what tiff size should be, check if it's correct
+    """
+    #get tiff size
+    tiff_shape = np.shape(tiff_array)
+    # calculate what tiff shape should be:
+    expected_tiff_shape = 
 
 
-
+    return
 if __name__ == "__main__":
     path_to_tiff = "/Users/nataliaorlova/Code/data/incoming/1180346813_fullfield.tiff"
 
     metadata = get_meta(path_to_tiff)
 
     meta = read_full_field_meta(metadata)
+    
+    tiff_array = read_tiff(path_to_tiff)
 
-    check_stack(meta)
+    check_meta(meta)
 
+    check_tiff(tiff_array, meta)
+
+    if meta['num_volumes'] > 1:
+        #averaging of the repeats here
 
 
 
 
 
 # how to pass the filepath to this file?
-# wihtout using argparser?
+# without using argparser?
