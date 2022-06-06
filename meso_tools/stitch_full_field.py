@@ -13,6 +13,7 @@
 #               Get portion of the tiff to insert, inset to location in destination file
 
 from meso_tools.io_utils import read_si_metadata as get_meta
+import numpy as np
 
 def read_full_field_meta(metadata):
     """
@@ -44,11 +45,28 @@ def check_stack(meta_dict):
     """
     assert meta_dict['channel_save'] == 1, f"More than 1 channel is set ot be saved when data acquired, unable to split"
     assert meta_dict['stack_type'] == 'uniform', f"stack is of wrong type, unable to split"
-    assert meta_dict['channel_save'] == 1, f"More than 1 channel is set ot be saved when data acquired, unable to split"
+
+    # check that all ROIs are in discrete plane mode
+    for i,roi in enumerate(meta_dict['rois']):
+        assert roi['discretePlaneMode'] == 0, f"ROI {i} is not in discrete plane mode, unable to split"
+    
+    return
+
+
 
 
 if __name__ == "__main__":
-    roi_meta = get_meta
+    path_to_tiff = "/Users/nataliaorlova/Code/data/incoming/1180346813_fullfield.tiff"
+
+    metadata = get_meta(path_to_tiff)
+
+    meta = read_full_field_meta(metadata)
+
+    check_stack(meta)
+
+
+
+
 
 
 # how to pass the filepath to this file?
