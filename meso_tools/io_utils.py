@@ -33,3 +33,12 @@ def read_si_metadata(path_to_tiff):
     """
     meta_data = tifffile.read_scanimage_metadata(open(path_to_tiff, 'rb'))
     return meta_data
+
+def get_roi_data(path_to_tiff):
+    """
+    function to read scnaimage metadata's ROI structure part
+    path: path to tiff file
+    returns: dict w metadata
+    """
+    meta_data = tifffile.read_scanimage_metadata(open(path_to_tiff, 'rb'))
+    return meta_data[1]
