@@ -24,3 +24,12 @@ def write_h5(path, h5_data):
     with h5py.File(path, 'w') as f:
         f.create_dataset('data', data=h5_data)
     return
+
+def read_si_metadata(path_to_tiff):
+    """
+    function to read scnaimage metadata in full
+    path: path to tiff file
+    returns: dict w metadata
+    """
+    meta_data = tifffile.read_scanimage_metadata(open(path_to_tiff, 'rb'))
+    return meta_data
