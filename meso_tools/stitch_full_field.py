@@ -4,13 +4,11 @@
 #   b) only channel 1 saving is enabled
 #   c) all rois are in non-discrete plane mode
 #   d) all rois have only one scanfield
-#   d) all rois are of the same pixel size (scaling would be too much work, plus we don't want to create a mess with resolution)
+#   d) all rois are of the same pixel size and degree size (scaling would be too much work, plus we don't want to create a mess with resolution)
 # 2. Get all above values for the stack (num of planes, etc)
 # 3. Asses that tiff size is correct
-
 # 4. If multiple repeats of the stack (volumes) - average them out before stitching
-# 5. Preallocated destination tiff:
-# 6. Keep track of what output size should be:
+
 # 7. Stitching:
 #       For nth z in z array:
 #           Load nth page of tiff
@@ -21,7 +19,6 @@
 from matplotlib import path
 from meso_tools.io_utils import read_si_metadata as get_meta
 from meso_tools.io_utils import read_tiff
-
 import numpy as np
 
 GAP = 24
@@ -66,6 +63,9 @@ def check_meta(meta_dict):
     pix_res = [roi['scanfields']['pixelResolutionXY'] for roi in  meta_dict['rois']]
     assert all(elem == pix_res[0] for elem in pix_res), f'ROIs are not of the same shape, unable to stitch'
 
+    degree_size = [roi['scanfields']['sizeXY'] for roi in  meta_dict['rois']]
+    assert all(elem == degree_size[0] for elem in degree_size), f'ROIs are not of the same size, unable to stitch'
+
     return
 
 def check_tiff(tiff_array, rois):
@@ -103,6 +103,23 @@ def average_tiff(tiff_array, meta):
         average_tiff = y
     return averaged_tiff
 
+def deg_to_pix(meta_dict):
+    """
+    converts size and  center location of each ROI to pixel instead of degrees
+    outputs meta_dict with pixel data added
+    """
+    
+    return
+
+def stitch_tiff(avg_tiff, output_tiff_shape):
+    """
+    actually stitch the file into a full FOV image
+    returns: stitched image, 2D mumpy array
+    """
+    output_tiff = np.array(output_tiff_shape)
+
+    return stitched_tiff
+
 if __name__ == "__main__":
     path_to_tiff = "/Users/nataliaorlova/Code/data/incoming/1180346813_fullfield.tiff"
 
@@ -118,15 +135,12 @@ if __name__ == "__main__":
 
     output_tiff_shape = check_tiff(tiff_array, meta['rois'])
 
-    if meta['num_volumes'] > 1:
-        average_repeats_tiff(tiff_array, meta)
-        #averaging of the repeats here
+    averaged_tiff = average_tiff(tiff_array, meta)
 
-    if meta['frames_per_slice'] > 1:
-        average_frames_per_plane(tiff_array, meta)
+    
+
+
 
 
 # ToDo
-# how to pass the filepath to this file?
-# without using argparser?
-# figure out the fucking gap between different ROI inserted to the Tiff page
+# how to pass the filepath to this file without using argparser?
