@@ -5,9 +5,7 @@
 #   c) all rois are in non-discrete plane mode
 #   d) all rois have only one scanfield
 #   d) all rois are of the same pixel size (scaling would be too much work, plus we don't want to create a mess with resolution)
-
 # 2. Get all above values for the stack (num of planes, etc)
-
 # 3. Asses that tiff size is correct
 
 # 4. If multiple repeats of the stack (volumes) - average them out before stitching
@@ -86,6 +84,14 @@ def check_tiff(tiff_array, rois):
 
     return output_tiff_shape
 
+def average_repeats_tiff(tiff_array, meta):
+    """
+    average input tiff accoring to number of stack repeats
+    """
+    repeats = meta_dict['num_volumes'] # this is number of repeats we want to average
+    slices =  meta_dict['num_slices']
+    #let's average every repeats*slices
+    return averaged_tiff
 
 if __name__ == "__main__":
     path_to_tiff = "/Users/nataliaorlova/Code/data/incoming/1180346813_fullfield.tiff"
@@ -100,8 +106,15 @@ if __name__ == "__main__":
 
     check_tiff(tiff_array, meta)
 
+    output_tiff_shape = check_tiff(tiff_array, meta['rois'])
+
     if meta['num_volumes'] > 1:
+        average_repeats_tiff(tiff_array, meta)
         #averaging of the repeats here
+
+    if meta['frames_per_slice'] > 1:
+        average_frames_per_plane(tiff_array, meta)
+
 
 
 
