@@ -3,6 +3,7 @@
 #   a) stack is of correct type
 #   b) only channel 1 saving is enabled
 #   c) all rois are in non-discrete plane mode
+#   d) all rois have only one scanfield
 #   d) all rois are of the same pixel size (scaling would be too much work, plus we don't want to create a mess with resolution)
 
 # 2. Get all above values for the stack (num of planes, etc)
@@ -56,8 +57,13 @@ def check_meta(meta_dict):
 
     # check that all ROIs are in discrete plane mode
     for i,roi in enumerate(meta_dict['rois']):
-        assert roi['discretePlaneMode'] == 0, f"ROI {i} is not in discrete plane mode, unable to split"
-    
+        assert roi['discretePlaneMode'] == 0, f"ROI {i} is not in discrete plane mode - unable to split"
+        assert isinstance(roi['scanfields'], dict), f"ROI {i} has more than one scnafield - unable to split"
+
+    #checking that all rois are of teh same size:
+    pix_res = [roi['scanfields']['pixelResolutionXY'] for roi in  meta_dict['rois']]
+    assert all(elem == pix_res[0] for elem in pix_res), f'ROIs are not of the same shape, unable to stitch'
+
     return
 
 def check_tiff(tiff_array, meta):
