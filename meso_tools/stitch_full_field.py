@@ -7,7 +7,9 @@
 #   d) all rois are of the same pixel size (scaling would be too much work, plus we don't want to create a mess with resolution)
 
 # 2. Get all above values for the stack (num of planes, etc)
+
 # 3. Asses that tiff size is correct
+
 # 4. If multiple repeats of the stack (volumes) - average them out before stitching
 # 5. Preallocated destination tiff:
 # 6. Keep track of what output size should be:
@@ -66,14 +68,15 @@ def check_meta(meta_dict):
 
     return
 
-def check_tiff(tiff_array, meta):
+def check_tiff(tiff_array, rois):
     """
     calculate what tiff size should be, check if it's correct
     """
     #get tiff size
     tiff_shape = np.shape(tiff_array)
     # calculate what tiff shape should be:
-    expected_tiff_shape = 
+    piz_res = rois[0]['scanfields']['pixelResolutionXY']
+    expected_tiff_shape = # here we need to figure
 
 
     return
@@ -96,6 +99,7 @@ if __name__ == "__main__":
 
 
 
-
+# ToDo
 # how to pass the filepath to this file?
 # without using argparser?
+# figure out the fucking gap between different ROI inserted to the Tiff page
