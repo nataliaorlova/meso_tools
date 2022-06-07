@@ -84,19 +84,23 @@ def check_tiff(tiff_array, rois):
 
     return output_tiff_shape
 
-def average_repeats_tiff(tiff_array, meta):
+def average_tiff(tiff_array, meta):
     """
-    average input tiff accoring to number of stack repeats and over the depth
+    average input tiff over all slices and number of stack repeats
     return : a single page tiff (2D np.array)
     """
-    repeats = meta['num_volumes'] # this is number of repeats we want to average
+    slices = meta['num_volumes'] # number of z slices
     # let's average eover repeats and slices
     # resahpe tp get array of [slices, repeats, y_pix_size, x_pix_size]
-    x = tiff_array.reshape(tiff_array.shape[0] // repeats, repeats, tiff_array.shape[1], tiff_array.shape[2]) 
+    x = tiff_array.reshape(tiff_array.shape[0] // slices, slices, tiff_array.shape[1], tiff_array.shape[2]) 
     # average over slices:
     y = x.mean(axis = 0) 
     # average over repeats:
-    averaged_tiff = y.mean(axis=0)
+    repeats = meta['num_volumes'] # this is number of repeats we want to average
+    if repeats > 1 : 
+        averaged_tiff = y.mean(axis=0)
+    else:
+        average_tiff = y
     return averaged_tiff
 
 if __name__ == "__main__":
@@ -120,9 +124,6 @@ if __name__ == "__main__":
 
     if meta['frames_per_slice'] > 1:
         average_frames_per_plane(tiff_array, meta)
-
-
-
 
 
 # ToDo
