@@ -26,6 +26,8 @@ from meso_tools.io_utils import read_tiff
 
 import numpy as np
 
+GAP = 24
+
 def read_full_field_meta(metadata):
     """
     reading of the relevant metadata fields
@@ -70,16 +72,21 @@ def check_meta(meta_dict):
 
 def check_tiff(tiff_array, rois):
     """
-    calculate what tiff size should be, check if it's correct
+    calculate what tiff size should be, check if it's correct, calculate output tiff shape
     """
     #get tiff size
     tiff_shape = np.shape(tiff_array)
     # calculate what tiff shape should be:
     pix_res = rois[0]['scanfields']['pixelResolutionXY']
-    expected_tiff_shape =  [pix_res[0]*len(rois), pix_res[1]] #to figure it out
-    #tif_gap = /(len(rois)-1)
+    output_tiff_shape =  [pix_res[0]*len(rois), pix_res[1]]
+    expected_tiff_shape = [num_slices*num_repeats, pix_res[1]*len(rois)+(GAP*(len(rois)-1)), pix_res[0]]
+    tiff_shape = np.shape(tiff_array)
 
-    return
+    assert expected_tiff_shape == list(tiff_shape), f"Input tiff shape is unexpected"
+
+    return output_tiff_shape
+
+
 if __name__ == "__main__":
     path_to_tiff = "/Users/nataliaorlova/Code/data/incoming/1180346813_fullfield.tiff"
 
