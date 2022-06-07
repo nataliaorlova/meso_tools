@@ -72,7 +72,7 @@ def check_tiff(tiff_array, rois):
     """
     calculate what tiff size should be, check if it's correct, calculate output tiff shape
     """
-    #get tiff size
+    # get tiff size
     tiff_shape = np.shape(tiff_array)
     # calculate what tiff shape should be:
     pix_res = rois[0]['scanfields']['pixelResolutionXY']
@@ -86,11 +86,17 @@ def check_tiff(tiff_array, rois):
 
 def average_repeats_tiff(tiff_array, meta):
     """
-    average input tiff accoring to number of stack repeats
+    average input tiff accoring to number of stack repeats and over the depth
+    return : a single page tiff (2D np.array)
     """
-    repeats = meta_dict['num_volumes'] # this is number of repeats we want to average
-    slices =  meta_dict['num_slices']
-    #let's average every repeats*slices
+    repeats = meta['num_volumes'] # this is number of repeats we want to average
+    # let's average eover repeats and slices
+    # resahpe tp get array of [slices, repeats, y_pix_size, x_pix_size]
+    x = tiff_array.reshape(tiff_array.shape[0] // repeats, repeats, tiff_array.shape[1], tiff_array.shape[2]) 
+    # average over slices:
+    y = x.mean(axis = 0) 
+    # average over repeats:
+    averaged_tiff = y.mean(axis=0)
     return averaged_tiff
 
 if __name__ == "__main__":
