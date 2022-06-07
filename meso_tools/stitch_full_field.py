@@ -75,9 +75,9 @@ def check_tiff(tiff_array, rois):
     #get tiff size
     tiff_shape = np.shape(tiff_array)
     # calculate what tiff shape should be:
-    piz_res = rois[0]['scanfields']['pixelResolutionXY']
-    expected_tiff_shape = # here we need to figure
-
+    pix_res = rois[0]['scanfields']['pixelResolutionXY']
+    expected_tiff_shape =  [pix_res[0]*len(rois), pix_res[1]] #to figure it out
+    #tif_gap = /(len(rois)-1)
 
     return
 if __name__ == "__main__":
