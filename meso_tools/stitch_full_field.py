@@ -73,7 +73,9 @@ def check_meta(meta_dict):
     degree_size = [roi['scanfields']['sizeXY'] for roi in  meta_dict['rois']]
     assert all(elem == degree_size[0] for elem in degree_size), f'ROIs are not of the same size, unable to stitch'
 
-    return
+    meta_dict['pixel_resolution'] = degree_size / pix_res
+
+    return meta_dict
 
 def check_tiff(tiff_array, meta_dict):
     """
@@ -200,7 +202,7 @@ if __name__ == "__main__":
 
     ff_meta_dict = read_full_field_meta(meta)
 
-    check_meta(ff_meta_dict)
+    ff_meta_dict = check_meta(ff_meta_dict)
 
     check_tiff(tiff_array, ff_meta_dict)
 
