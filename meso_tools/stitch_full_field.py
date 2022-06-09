@@ -8,7 +8,6 @@
 # 2. Get all above values for the stack (num of planes, etc)
 # 3. Asses that tiff size is correct
 # 4. If multiple repeats of the stack (volumes) - average them out before stitching
-
 # 7. Stitching:
 #       For nth z in z array:
 #           Load nth page of tiff
@@ -16,9 +15,11 @@
 #               Get roi’s pixel size, and location
 #               Get portion of the tiff to insert, inset to location in destination file
 
+# 8. insert surface averages into stitched tiff
+
 from matplotlib import path
 from meso_tools.io_utils import read_si_metadata as get_meta
-from meso_tools.io_utils import read_tiff
+from meso_tools.io_utils import read_tiff, write_tiff
 import numpy as np
 
 GAP = 24
@@ -187,9 +188,6 @@ if __name__ == "__main__":
     write_tiff(write_path, stitched_tiff)
 
     
-
-
-
 
 # ToDo
 # how to pass the filepath to this file without using argparser?
