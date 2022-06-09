@@ -68,12 +68,15 @@ def check_meta(meta_dict):
 
     return
 
-def check_tiff(tiff_array, rois):
+def check_tiff(tiff_array, meta_dict):
     """
     calculate what tiff size should be, check if it's correct, calculate output tiff shape
     """
     # get tiff size
     tiff_shape = np.shape(tiff_array)
+    rois = meta_dict['rois']
+    num_slices = meta_dict['num_slices']
+    num_repeats = meta_dict['num_volumes']
     # calculate what tiff shape should be:
     pix_res = rois[0]['scanfields']['pixelResolutionXY']
     output_tiff_shape =  [pix_res[0]*len(rois), pix_res[1]]
@@ -100,42 +103,88 @@ def average_tiff(tiff_array, meta):
     if repeats > 1 : 
         averaged_tiff = y.mean(axis=0)
     else:
-        average_tiff = y
+        averaged_tiff = y
     return averaged_tiff
 
-def deg_to_pix(meta_dict):
-    """
-    converts size and  center location of each ROI to pixel instead of degrees
-    outputs meta_dict with pixel data added
-    """
-    
-    return
-
-def stitch_tiff(avg_tiff, output_tiff_shape):
+def stitch_tiff(averaged_tiff, meta_dict, output_tiff_shape):
     """
     actually stitch the file into a full FOV image
     returns: stitched image, 2D mumpy array
     """
-    output_tiff = np.array(output_tiff_shape)
+
+    rois = meta_dict['rois']
+
+    output_tiff_shape = [output_tiff_shape[1],output_tiff_shape[0]]
+
+    stitched_tiff = np.empty(output_tiff_shape)
+
+    pix_to_deg_x = rois[0]['scanfields']['pixelResolutionXY'][0]/rois[0]['scanfields']['sizeXY'][0]
+    pix_to_deg_y = rois[0]['scanfields']['pixelResolutionXY'][1]/rois[0]['scanfields']['sizeXY'][1]
+
+    roi_centers = np.array([roi['scanfields']['centerXY'] for roi in  rois]) # [x,y] array of ROI centers
+    roi_sizes = np.array([roi['scanfields']['sizeXY'] for roi in  rois]) # [x, y] array of ROI sizes
+
+    # calculate top right corner
+    insert_top_right = roi_centers - roi_sizes/2
+    insert_bottom_left = roi_centers + roi_sizes/2
+
+    #normalize top right corner coords
+    roi_x_min = np.min([i[0] for i in insert_top_right])
+    roi_y_min = np.min([i[1] for i in insert_top_right])
+    insert_top_right -= [roi_x_min, roi_y_min]
+
+    #normalize bottom left corner coords
+    insert_bottom_left -= [roi_x_min, roi_y_min]
+
+    # convert insert coordinates to pixels
+    insert_top_right *= [pix_to_deg_x, pix_to_deg_y]
+    insert_top_right = insert_top_right.round(0)
+    insert_top_right = insert_top_right.astype(np.int16)
+    insert_top_right[:, [1, 0]] = insert_top_right[:, [0, 1]]
+
+    insert_bottom_left *= [pix_to_deg_x, pix_to_deg_y]
+    insert_bottom_left = insert_bottom_left.round(0)
+    insert_bottom_left = insert_bottom_left.astype(np.int16)
+    insert_bottom_left[:, [1, 0]] = insert_bottom_left[:, [0, 1]]
+
+    # convert sizes to pixels:
+    roi_sizes *= np.array([pix_to_deg_x, pix_to_deg_y])
+    roi_sizes = roi_sizes.astype(int)
+
+    cut_top_right = np.array([[i*(roi_sizes[i][1] + GAP), 0] for i, roi in enumerate(rois)])
+    cut_bottom_left = np.array([[(i+1)*(roi_sizes[i][1]) + i*GAP, 60] for i, roi in enumerate(rois)])
+
+    for i, _ in enumerate(rois):
+        print(i)
+        image_to_insert = averaged_tiff[cut_top_right[i][0]:cut_bottom_left[i][0], cut_top_right[i][1]:cut_bottom_left[i][1]]
+        stitched_tiff[insert_top_right[i][0]:insert_bottom_left[i][0], insert_top_right[i][1]:insert_bottom_left[i][1]] = image_to_insert
 
     return stitched_tiff
 
 if __name__ == "__main__":
+
+    GAP = 24
+
     path_to_tiff = "/Users/nataliaorlova/Code/data/incoming/1180346813_fullfield.tiff"
 
-    metadata = get_meta(path_to_tiff)
+    meta = get_meta(path_to_tiff)
 
-    meta = read_full_field_meta(metadata)
-    
+    meta_dict = read_full_field_meta(meta)
+
     tiff_array = read_tiff(path_to_tiff)
 
-    check_meta(meta)
+    check_meta(meta_dict)
 
-    check_tiff(tiff_array, meta)
+    check_tiff(tiff_array, meta_dict)
 
-    output_tiff_shape = check_tiff(tiff_array, meta['rois'])
+    output_tiff_shape = check_tiff(tiff_array, meta_dict)
 
-    averaged_tiff = average_tiff(tiff_array, meta)
+    averaged_tiff = average_tiff(tiff_array, meta_dict)
+
+    stitched_tiff = stitch_tiff(averaged_tiff, meta_dict, output_tiff_shape)
+
+    write_path = "/Users/nataliaorlova/Code/data/incoming/1180346813_fullfield_stitched.tiff"
+    write_tiff(write_path, stitched_tiff)
 
     
 
