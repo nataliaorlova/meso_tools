@@ -14,8 +14,12 @@
 #           For each roi in rois:
 #               Get roi’s pixel size, and location
 #               Get portion of the tiff to insert, inset to location in destination file
+# 8. split and avergae surface images 
 
-# 8. insert surface averages into stitched tiff
+# 9. insert surface averages into stitched tiff
+#       downsample to match full field file resolution
+#       figure out insert coordinates
+#       
 
 from matplotlib import path
 from meso_tools.io_utils import read_si_metadata as get_meta
@@ -31,6 +35,8 @@ def read_full_field_meta(metadata):
     """
     md_general = metadata[0]  
     meta_dict = {}
+    
+    # quantifying properties:
     meta_dict['num_slices'] = md_general['SI.hStackManager.actualNumSlices']
     meta_dict['num_volumes'] = md_general['SI.hStackManager.actualNumVolumes']
     meta_dict['z_step'] = md_general['SI.hStackManager.actualStackZStepSize']
@@ -161,30 +167,58 @@ def stitch_tiff(averaged_tiff, meta_dict, output_tiff_shape):
 
     return stitched_tiff
 
+def split_surface(path_to_surface):
+    surface_array = read_tiff(path_to_surface)
+    surface_meta = get_meta(path_to_surface)
+    
+    ff_meta_dict['rois'] = surface_meta[1]['RoiGroups']['imagingRoiGroup']['rois']
+    num_repeats = surface_meta[0]['SI.hStackManager.actualNumVolumes']
+    num_rois = len(ff_meta_dict['rois'])
+
+    # averaging over number of repeats: 
+    surface_averaged = np.average(surface_array.reshape(num_repeats, -1, surface_array.shape[1], surface_array.shape[2]), axis=0)
+
+    for i in range(len(ff_meta_dict['rois'])):
+        ff_meta_dict['rois'][i]['array'] = surface_averaged[i, :,:]
+
+    return ff_meta_dict
+
+def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
+
+    return
+
+
 if __name__ == "__main__":
 
     GAP = 24
 
     path_to_tiff = "/Users/nataliaorlova/Code/data/incoming/1180346813_fullfield.tiff"
 
-    meta = get_meta(path_to_tiff)
-
-    meta_dict = read_full_field_meta(meta)
-
     tiff_array = read_tiff(path_to_tiff)
 
-    check_meta(meta_dict)
+    meta = get_meta(path_to_tiff)
 
-    check_tiff(tiff_array, meta_dict)
+    ff_meta_dict = read_full_field_meta(meta)
 
-    output_tiff_shape = check_tiff(tiff_array, meta_dict)
+    check_meta(ff_meta_dict)
 
-    averaged_tiff = average_tiff(tiff_array, meta_dict)
+    check_tiff(tiff_array, ff_meta_dict)
 
-    stitched_tiff = stitch_tiff(averaged_tiff, meta_dict, output_tiff_shape)
+    output_tiff_shape = check_tiff(tiff_array, ff_meta_dict)
+
+    ff_averaged_tiff = average_tiff(tiff_array, ff_meta_dict)
+
+    ff_stitched_tiff = stitch_tiff(ff_averaged_tiff, ff_meta_dict, output_tiff_shape)
+
+    surface_path = "/Users/nataliaorlova/Code/data/incoming/1180346813_averaged_surface.tiff"
+
+    split_surface_meta = split_surface(surface_path)
+
+    insert_surface_to_ff()
+
 
     write_path = "/Users/nataliaorlova/Code/data/incoming/1180346813_fullfield_stitched.tiff"
-    write_tiff(write_path, stitched_tiff)
+    write_tiff(write_path, ff_stitched_tiff)
 
     
 
