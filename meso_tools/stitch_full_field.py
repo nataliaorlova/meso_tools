@@ -184,7 +184,7 @@ def split_surface(path_to_surface):
     for i in range(len(surface_meta_dict['rois'])):
         surface_meta_dict['rois'][i]['array'] = surface_averaged[i, :,:]
 
-    return surface_meta, surface_averaged
+    return surface_meta_dict, surface_averaged
 
 def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
 
