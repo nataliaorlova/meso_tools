@@ -73,7 +73,7 @@ def check_meta(meta_dict):
     degree_size = [roi['scanfields']['sizeXY'] for roi in  meta_dict['rois']]
     assert all(elem == degree_size[0] for elem in degree_size), f'ROIs are not of the same size, unable to stitch'
 
-    meta_dict['pixel_resolution'] = degree_size / pix_res
+    meta_dict['pixel_resolution'] = np.array(degree_size) / np.array(pix_res)
 
     return meta_dict
 
@@ -170,20 +170,21 @@ def stitch_tiff(averaged_tiff, meta_dict, output_tiff_shape):
     return stitched_tiff
 
 def split_surface(path_to_surface):
+
     surface_array = read_tiff(path_to_surface)
     surface_meta = get_meta(path_to_surface)
-    
-    ff_meta_dict['rois'] = surface_meta[1]['RoiGroups']['imagingRoiGroup']['rois']
-    num_repeats = surface_meta[0]['SI.hStackManager.actualNumVolumes']
-    num_rois = len(ff_meta_dict['rois'])
+    surface_meta_dict = {}
+    surface_meta_dict['rois'] = surface_meta[1]['RoiGroups']['imagingRoiGroup']['rois']
+    surface_meta_dict['num_repeats'] = surface_meta[0]['SI.hStackManager.actualNumVolumes']
+    surface_meta_dict['num_rois'] = len(surface_meta_dict['rois'])
 
     # averaging over number of repeats: 
-    surface_averaged = np.average(surface_array.reshape(num_repeats, -1, surface_array.shape[1], surface_array.shape[2]), axis=0)
+    surface_averaged = np.average(surface_array.reshape(surface_meta_dict['num_repeats'], -1, surface_array.shape[1], surface_array.shape[2]), axis=0)
 
-    for i in range(len(ff_meta_dict['rois'])):
-        ff_meta_dict['rois'][i]['array'] = surface_averaged[i, :,:]
+    for i in range(len(surface_meta_dict['rois'])):
+        surface_meta_dict['rois'][i]['array'] = surface_averaged[i, :,:]
 
-    return ff_meta_dict
+    return surface_meta, surface_averaged
 
 def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
 
@@ -214,10 +215,7 @@ if __name__ == "__main__":
 
     surface_path = "/Users/nataliaorlova/Code/data/incoming/1180346813_averaged_surface.tiff"
 
-    split_surface_meta = split_surface(surface_path)
-
-    insert_surface_to_ff()
-
+    split_surface_meta, surface_averaged = split_surface(surface_path)
 
     write_path = "/Users/nataliaorlova/Code/data/incoming/1180346813_fullfield_stitched.tiff"
     write_tiff(write_path, ff_stitched_tiff)
