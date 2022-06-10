@@ -73,7 +73,7 @@ def check_meta(meta_dict):
     degree_size = [roi['scanfields']['sizeXY'] for roi in  meta_dict['rois']]
     assert all(elem == degree_size[0] for elem in degree_size), f'ROIs are not of the same size, unable to stitch'
 
-    meta_dict['pixel_resolution'] = np.array(degree_size) / np.array(pix_res)
+    meta_dict['pixel_resolution'] = np.array(pix_res)
 
     return meta_dict
 
