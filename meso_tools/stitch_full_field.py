@@ -25,6 +25,7 @@ from matplotlib import path
 from meso_tools.io_utils import read_si_metadata as get_meta
 from meso_tools.io_utils import read_tiff, write_tiff
 import numpy as np
+from skimage.transform import  resize
 
 GAP = 24
 
@@ -186,6 +187,30 @@ def split_surface(path_to_surface):
 
     return surface_meta_dict, surface_averaged
 
+def im_negative_rescale(data):
+    """
+    mapping image to non-negative range
+    data: inmage as 2D nupmy array
+    return: data_out: remapped image
+    """
+    # rescale image histogram to non negative range
+    max_intensity = np.max(data)
+    min_intensity = np.min(data)
+    data_out = ((data - min_intensity)*2**16/(max_intensity-min_intensity)).astype(np.uint16)
+    return data_out
+
+def data_downsample(data, scaling_factor):
+    """
+    donwssampling image data according ot the sampling factor
+    data: 2d numpy array representing the image
+    sampling factor: float
+    return: downsampled image in a numpy array
+    """
+    data_scaled_shape = np.asarray(data.shape / scaling_factor, dtype=int)
+    data_scaled = (resize(data, data_scaled_shape)*2**16).astype(np.uint16)
+    return data_scaled
+
+
 def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
 
     # get pixel to degrees for full field data
@@ -208,8 +233,6 @@ def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
     # calculate scaling factor
     convert_factor = pixel_resolution_ff/pixel_resolution_surf
     # downsampling 
-    
-
 
     return
 
