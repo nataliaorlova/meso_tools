@@ -188,6 +188,29 @@ def split_surface(path_to_surface):
 
 def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
 
+    # get pixel to degrees for full field data
+    pixel_resolution_ff = ff_meta_dict['pixel_to_degree']
+
+    # get pixel resolution and check that resolution of all rois in surface is the same
+    pix_res = [roi['scanfields']['pixelResolutionXY'] for roi in  split_surface_meta['rois']]
+    assert all(elem == pix_res[0] for elem in pix_res), f'ROIs are not of the same shape, unable to stitch'
+    pix_res_surface = np.array(pix_res[0])
+
+    # get degree size and check that resolution of all rois in surface is the same
+    degree_size = [roi['scanfields']['sizeXY'] for roi in  split_surface_meta['rois']]
+    assert all(elem == degree_size[0] for elem in degree_size), f'ROIs are not of the same shape, unable to stitch'
+    degree_size_surface = np.array(degree_size[0])
+
+    # finally, pixel to degree for surface data
+    pixel_resolution_surf = pix_res_surface / degree_size_surface
+
+    # bring two piece of data tot eh same pix/degree (usually this means downsampling surafce tiff arrays)
+    # calculate scaling factor
+    convert_factor = pixel_resolution_ff/pixel_resolution_surf
+    # downsampling 
+    
+
+
     return
 
 
@@ -212,7 +235,6 @@ if __name__ == "__main__":
     ff_averaged_tiff = average_tiff(tiff_array, ff_meta_dict)
 
     ff_stitched_tiff = stitch_tiff(ff_averaged_tiff, ff_meta_dict, output_tiff_shape)
-
     surface_path = "/Users/nataliaorlova/Code/data/incoming/1180346813_averaged_surface.tiff"
 
     split_surface_meta, surface_averaged = split_surface(surface_path)
