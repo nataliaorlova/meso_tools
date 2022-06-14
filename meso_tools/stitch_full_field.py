@@ -142,11 +142,12 @@ def stitch_tiff(averaged_tiff, meta_dict, output_tiff_shape):
     roi_x_min = np.min([i[0] for i in insert_top_right])
     roi_y_min = np.min([i[1] for i in insert_top_right])
     insert_top_right -= [roi_x_min, roi_y_min]
-
-    #normalize bottom left corner coords, degrees
-    insert_bottom_left -= [roi_x_min, roi_y_min]
     meta_dict['min_x'] = roi_x_min
     meta_dict['min_y'] = roi_y_min
+    
+    #normalize bottom left corner coords, degrees
+    insert_bottom_left -= [roi_x_min, roi_y_min]
+
 
     # convert insert coordinates to pixels
     insert_top_right *= [pix_to_deg_x, pix_to_deg_y]
