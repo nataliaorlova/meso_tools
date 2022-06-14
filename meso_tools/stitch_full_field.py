@@ -148,7 +148,6 @@ def stitch_tiff(averaged_tiff, meta_dict, output_tiff_shape):
     #normalize bottom left corner coords, degrees
     insert_bottom_left -= [roi_x_min, roi_y_min]
 
-
     # convert insert coordinates to pixels
     insert_top_right *= [pix_to_deg_x, pix_to_deg_y]
     insert_top_right = insert_top_right.round(0)
@@ -169,7 +168,8 @@ def stitch_tiff(averaged_tiff, meta_dict, output_tiff_shape):
 
     for i, _ in enumerate(rois):
         image_to_insert = averaged_tiff[cut_top_right[i][0]:cut_bottom_left[i][0], cut_top_right[i][1]:cut_bottom_left[i][1]]
-        stitched_tiff[insert_top_right[i][0]:insert_bottom_left[i][0], insert_top_right[i][1]:insert_bottom_left[i][1]] = image_to_insert
+        b = im_negative_rescale(image_to_insert)
+        stitched_tiff[insert_top_right[i][0]:insert_bottom_left[i][0], insert_top_right[i][1]:insert_bottom_left[i][1]] = b
 
     return stitched_tiff, meta_dict
 
@@ -218,6 +218,7 @@ def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
 
     # get pixel to degrees for full field data
     pixel_resolution_ff = ff_meta_dict['pixel_to_degree']
+    right_corner_ff = np.array([ff_meta_dict['min_y'], ff_meta_dict['min_x']])
 
     # get pixel resolution and check that resolution of all rois in surface is the same
     pix_res = [roi['scanfields']['pixelResolutionXY'] for roi in  split_surface_meta['rois']]
@@ -241,11 +242,33 @@ def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
         b = im_negative_rescale(a)
         c = data_downsample(b, convert_factor)
         roi['downsampled_array'] = c
+    
+    for roi in split_surface_meta["rois"]:
+        scanfield = roi['scanfields']
+        roi_center = np.array(scanfield['centerXY']) # get center
+        roi_size = np.array(scanfield['sizeXY']) # get size
+        # convert to pixels
+        roi_center *= pixel_resolution_ff
+        roi_size *= pixel_resolution_ff
+        # round down
+        roi_size = np.floor(roi_size)
+        roi_center = np.floor(roi_center)
+        # caculate paste coordinates
+        top_right = roi_center - roi_size/2 
+        bottom_left = roi_center + roi_size/2
 
-    # calculate insert coordinates
+        # normalize to right top corner    
+        top_right -= (right_corner_ff * pixel_resolution_ff)
+        bottom_left -= (right_corner_ff * pixel_resolution_ff)
 
+        # cast as int
+        top_right = top_right.astype(np.int16)
+        bottom_left = bottom_left.astype(np.int16)
 
-    return
+        #insert into full field image:
+        ff_stitched_tiff[top_right[0]:bottom_left[0], top_right[1]:bottom_left[1]] = roi['downsampled_array']
+
+    return ff_stitched_tiff
 
 
 if __name__ == "__main__":
