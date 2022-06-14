@@ -15,11 +15,11 @@
 #               Get roi’s pixel size, and location
 #               Get portion of the tiff to insert, inset to location in destination file
 # 8. split and avergae surface images 
-
 # 9. insert surface averages into stitched tiff
 #       downsample to match full field file resolution
+
 #       figure out insert coordinates
-#       
+#           normalization w regards to full field is problematic 
 
 from matplotlib import path
 from meso_tools.io_utils import read_si_metadata as get_meta
@@ -54,7 +54,7 @@ def read_full_field_meta(metadata):
 
 def check_meta(meta_dict):
     """
-    assesions to check if the stakc is of correct type:
+    assertions to check if the stack is of correct type and skimming off metadata
     1. Unifrom, non-centered
     2. only channel 1 is set to be saved
     3. all ROIs are in non-discrete mode 
@@ -67,14 +67,14 @@ def check_meta(meta_dict):
         assert roi['discretePlaneMode'] == 0, f"ROI {i} is not in discrete plane mode - unable to split"
         assert isinstance(roi['scanfields'], dict), f"ROI {i} has more than one scnafield - unable to split"
 
-    #checking that all rois are of teh same size:
+    #checking that all rois are of the same size:
     pix_res = [roi['scanfields']['pixelResolutionXY'] for roi in  meta_dict['rois']]
     assert all(elem == pix_res[0] for elem in pix_res), f'ROIs are not of the same shape, unable to stitch'
 
     degree_size = [roi['scanfields']['sizeXY'] for roi in  meta_dict['rois']]
     assert all(elem == degree_size[0] for elem in degree_size), f'ROIs are not of the same size, unable to stitch'
-
-    meta_dict['pixel_to_degree'] = np.array(pix_res[0])/np.array(degree_size[0])
+    # take pixel resolution of hte first ROI since we checked that they all are of the same rezolution
+    meta_dict['pixel_to_degree'] = np.array(pix_res[0])/np.array(degree_size[0]) 
 
     return meta_dict
 
@@ -145,6 +145,8 @@ def stitch_tiff(averaged_tiff, meta_dict, output_tiff_shape):
 
     #normalize bottom left corner coords, degrees
     insert_bottom_left -= [roi_x_min, roi_y_min]
+    meta_dict['min_x'] = roi_x_min
+    meta_dict['min_y'] = roi_y_min
 
     # convert insert coordinates to pixels
     insert_top_right *= [pix_to_deg_x, pix_to_deg_y]
@@ -168,7 +170,7 @@ def stitch_tiff(averaged_tiff, meta_dict, output_tiff_shape):
         image_to_insert = averaged_tiff[cut_top_right[i][0]:cut_bottom_left[i][0], cut_top_right[i][1]:cut_bottom_left[i][1]]
         stitched_tiff[insert_top_right[i][0]:insert_bottom_left[i][0], insert_top_right[i][1]:insert_bottom_left[i][1]] = image_to_insert
 
-    return stitched_tiff
+    return stitched_tiff, meta_dict
 
 def split_surface(path_to_surface):
 
@@ -239,9 +241,7 @@ def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
         c = data_downsample(b, convert_factor)
         roi['downsampled_array'] = c
 
-
-
-    #calculate insert coordinates
+    # calculate insert coordinates
 
 
     return
@@ -267,7 +267,7 @@ if __name__ == "__main__":
 
     ff_averaged_tiff = average_tiff(tiff_array, ff_meta_dict)
 
-    ff_stitched_tiff = stitch_tiff(ff_averaged_tiff, ff_meta_dict, output_tiff_shape)
+    ff_stitched_tiff, ff_meta_dict = stitch_tiff(ff_averaged_tiff, ff_meta_dict, output_tiff_shape)
     surface_path = "/Users/nataliaorlova/Code/data/incoming/1180346813_averaged_surface.tiff"
 
     split_surface_meta, surface_averaged = split_surface(surface_path)
