@@ -131,19 +131,19 @@ def stitch_tiff(averaged_tiff, meta_dict, output_tiff_shape):
     pix_to_deg_x = rois[0]['scanfields']['pixelResolutionXY'][0]/rois[0]['scanfields']['sizeXY'][0]
     pix_to_deg_y = rois[0]['scanfields']['pixelResolutionXY'][1]/rois[0]['scanfields']['sizeXY'][1]
 
-    roi_centers = np.array([roi['scanfields']['centerXY'] for roi in  rois]) # [x,y] array of ROI centers
-    roi_sizes = np.array([roi['scanfields']['sizeXY'] for roi in  rois]) # [x, y] array of ROI sizes
+    roi_centers = np.array([roi['scanfields']['centerXY'] for roi in  rois]) # [x,y] array of ROI centers in degrees
+    roi_sizes = np.array([roi['scanfields']['sizeXY'] for roi in  rois]) # [x, y] array of ROI sizes in degrees
 
-    # calculate top right corner
+    # calculate top right corner, degrees
     insert_top_right = roi_centers - roi_sizes/2
     insert_bottom_left = roi_centers + roi_sizes/2
 
-    #normalize top right corner coords
+    #normalize top right corner coords, degrees
     roi_x_min = np.min([i[0] for i in insert_top_right])
     roi_y_min = np.min([i[1] for i in insert_top_right])
     insert_top_right -= [roi_x_min, roi_y_min]
 
-    #normalize bottom left corner coords
+    #normalize bottom left corner coords, degrees
     insert_bottom_left -= [roi_x_min, roi_y_min]
 
     # convert insert coordinates to pixels
@@ -231,8 +231,18 @@ def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
 
     # bring two piece of data tot eh same pix/degree (usually this means downsampling surafce tiff arrays)
     # calculate scaling factor
-    convert_factor = pixel_resolution_ff/pixel_resolution_surf
+    convert_factor = pixel_resolution_surf/pixel_resolution_ff
     # downsampling 
+    for i, roi in enumerate(split_surface_meta["rois"]):
+        a = roi['array']
+        b = im_negative_rescale(a)
+        c = data_downsample(b, convert_factor)
+        roi['downsampled_array'] = c
+
+
+
+    #calculate insert coordinates
+
 
     return
 
