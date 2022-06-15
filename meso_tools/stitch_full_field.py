@@ -167,8 +167,8 @@ def stitch_tiff(averaged_tiff, meta_dict, output_tiff_shape):
     cut_bottom_left = np.array([[(i+1)*(roi_sizes[i][1]) + i*GAP, 60] for i, roi in enumerate(rois)])
 
     for i, _ in enumerate(rois):
+        averaged_tiff = im_negative_rescale(averaged_tiff)
         image_to_insert = averaged_tiff[cut_top_right[i][0]:cut_bottom_left[i][0], cut_top_right[i][1]:cut_bottom_left[i][1]]
-        b = im_negative_rescale(image_to_insert)
         stitched_tiff[insert_top_right[i][0]:insert_bottom_left[i][0], insert_top_right[i][1]:insert_bottom_left[i][1]] = b
 
     return stitched_tiff, meta_dict
