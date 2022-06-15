@@ -266,7 +266,7 @@ def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
         bottom_left = bottom_left.astype(np.int16)
 
         #insert into full field image:
-        ff_stitched_tiff[top_right[0]:bottom_left[0], top_right[1]:bottom_left[1]] = roi['downsampled_array']
+        ff_stitched_tiff[top_right[1]:bottom_left[1], top_right[0]:bottom_left[0]] = roi['downsampled_array']
 
     return ff_stitched_tiff
 
@@ -298,8 +298,6 @@ if __name__ == "__main__":
 
     write_path = "/Users/nataliaorlova/Code/data/incoming/1180346813_fullfield_stitched.tiff"
     write_tiff(write_path, ff_stitched_tiff)
-
-    
 
 # ToDo
 # how to pass the filepath to this file without using argparser?
