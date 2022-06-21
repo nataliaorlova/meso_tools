@@ -164,7 +164,7 @@ def stitch_tiff(averaged_tiff, meta_dict, output_tiff_shape):
     roi_sizes = roi_sizes.astype(int)
 
     cut_top_right = np.array([[i*(roi_sizes[i][1] + GAP), 0] for i, roi in enumerate(rois)])
-    cut_bottom_left = np.array([[(i+1)*(roi_sizes[i][1]) + i*GAP, 60] for i, roi in enumerate(rois)])
+    cut_bottom_left = np.array([[(i+1)*(roi_sizes[i][1]) + i*GAP, roi_sizes[i][0]] for i, roi in enumerate(rois)])
 
     for i, _ in enumerate(rois):
         averaged_tiff = im_negative_rescale(averaged_tiff)
