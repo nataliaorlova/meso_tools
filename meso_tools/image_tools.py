@@ -71,5 +71,27 @@ def average_intensity(filepath):
         intensity.append(x)
     return np.array(intensity)
 
-def split_multichannel_data(image, channels):
-    return
+def aling_phase(image):
+    """
+    function to aligne line phase in an image:
+    Inputs:
+        image: 2D numpy array representing an image, i.w page of a multipage tiff file
+    Return:
+        image_aligned : 2D numpy array representing phase-aligned image
+    """
+    # calculate mean offset int eh frame:
+    offsets = []
+    i=1
+    while i < len(page)-1 : 
+        line1 = page[i]
+        line2 = page[i+1]
+        offset = len(line1)/2 - np.argmax(np.correlate(line1, line2, mode='same'))
+        offsets.append(offset)
+        i += 2
+    offset = np.round(np.mean(offsets))
+
+    # move every line by offset/2
+
+
+
+    return image_aligned
