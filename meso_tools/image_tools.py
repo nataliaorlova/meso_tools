@@ -82,16 +82,14 @@ def aling_phase(image):
     # calculate mean offset int eh frame:
     offsets = []
     i=1
-    while i < len(page)-1 : 
-        line1 = page[i]
-        line2 = page[i+1]
-        offset = len(line1)/2 - np.argmax(np.correlate(line1, line2, mode='same'))
+    while i < len(image)-1 : 
+        offset = image.shape[0]/2 - np.argmax(np.correlate(image[i], image[i+1], mode='same'))
         offsets.append(offset)
         i += 2
     offset = np.round(np.mean(offsets))
 
     # move every line by offset/2
-
+    new_image = np.zeros((int(image.shape[0]+offset), image.shape[1]))
 
 
     return image_aligned
