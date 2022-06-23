@@ -99,6 +99,6 @@ def aling_phase(image):
         image_aligned[i+1, offset:] = image[i+1]
         i += 2
 
-    image_aligned = image_aligned[:, 1:image_aligned.shape[1]-1]
+    image_aligned = image_aligned[:, 1:image_aligned.shape[1]-offset]
 
     return offset, image_aligned
