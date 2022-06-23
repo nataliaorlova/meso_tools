@@ -78,6 +78,7 @@ def aling_phase(image):
         image: 2D numpy array representing an image, i.w page of a multipage tiff file
     Return:
         image_aligned : 2D numpy array representing phase-aligned image
+        offset : int, mean offset calculated for all pairs of lines in the image
     """
 
     # calculate mean offset in the frame:
