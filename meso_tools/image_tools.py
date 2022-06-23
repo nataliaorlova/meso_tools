@@ -133,3 +133,6 @@ def align_phase_stack(stack):
         stack_aligned[i] = page_aligned
     
     return stack_aligned
+
+def get_image_snr(image):
+    return anr
