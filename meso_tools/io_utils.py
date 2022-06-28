@@ -8,6 +8,18 @@ def read_tiff(path):
     im = tifffile.imread(path)
     return im
 
+def read_n_pages(path_to_tiff, n):
+    """ reads only n pages of given tiff file
+    Input:
+        path_to_tiff: str: local path to the tifffile
+        n : int : number of pages to read
+    Return:
+        tiff_array: 3D numpy array representing timeseries that was read
+    """
+    with tifffile.TiffFile(path_to_tiff, mode ='rb') as tiff:
+        tiff_array = tiff.asarray(range(0, n))
+    return tiff_array
+
 def write_tiff(path, data):
     tifffile.imsave(path, data)
     return
