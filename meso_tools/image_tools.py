@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from skimage import io
 import tifffile as tiff
+import glob
 
 CMAPS = ['Accent', 'Accent_r', 'Blues', 'Blues_r', 'BrBG', 'BrBG_r', 'BuGn', 'BuGn_r', 'BuPu', 'BuPu_r',
                  'CMRmap', 'CMRmap_r', 'Dark2', 'Dark2_r', 'GnBu', 'GnBu_r', 'Greens', 'Greens_r', 'Greys',
