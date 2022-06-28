@@ -134,5 +134,14 @@ def align_phase_stack(stack):
     
     return stack_aligned
 
-def get_image_snr(image):
-    return anr
+def average_n(array, n):
+    """averages every N frames of the timeseries
+    Input:
+        array: numpy 3D array
+        n: int: number of rames to average
+    Return:
+        averaged timeseries
+    """
+    reshaped_array = array.reshape(n, int(array.shape[0]/n), array.shape[1], array.shape[2])
+    avg_array = reshaped_array.mean(axis=0)
+    return avg_array
