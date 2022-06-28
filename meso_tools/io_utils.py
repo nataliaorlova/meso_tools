@@ -4,20 +4,23 @@
 import tifffile
 import h5py
 
-def read_tiff(path):
-    im = tifffile.imread(path)
-    return im
-
-def read_n_pages(path_to_tiff, n):
-    """ reads only n pages of given tiff file
-    Input:
+def read_tiff(path_to_tiff, page_num=None):
+    """ reads either entire tiff file, or if n is given, N pages of it
         path_to_tiff: str: local path to the tifffile
-        n : int : number of pages to read
+        page_num : int : number of pages to read, if none provide,d willa teempt to read entire tiff file. Will limlit to 5000 if tiff has more that 5000 pages.
     Return:
         tiff_array: 3D numpy array representing timeseries that was read
     """
     with tifffile.TiffFile(path_to_tiff, mode ='rb') as tiff:
-        tiff_array = tiff.asarray(range(0, n))
+        if page_num: 
+                tiff_array = tiff.asarray(range(0, page_num))
+        else: # number of pages is not provided: 
+            if len(tiff.pages) >=5000:
+                print(f"This timeseries has more than 5000 frames to not overload RAM, we will only read 5000 first pages.")
+                print(f"To read more pages,in case large amount of RAM is available, provide number of pages to read by calling read_tiff(path_to_tiff, page_num=value)")
+                page_num = 5000
+                with tifffile.TiffFile(path_to_tiff, mode ='rb') as tiff:
+                    tiff_array = tiff.asarray(range(0, page_num))
     return tiff_array
 
 def write_tiff(path, data):
