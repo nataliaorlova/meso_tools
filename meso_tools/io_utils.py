@@ -3,6 +3,7 @@
 
 import tifffile
 import h5py
+import pandas as pd
 from allensdk.internal.api import PostgresQueryMixin
 
 def read_tiff(path_to_tiff, page_num=None):
