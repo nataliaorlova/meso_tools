@@ -94,21 +94,20 @@ def aling_phase(image, do_align = True, offset = None):
             i += 2
         offset = int(np.round(np.mean(offsets)))
 
-    else: 
-        if do_align: 
-            # move every line by offset/2
-            image_aligned = np.zeros((image.shape[0], int(image.shape[1]+offset)))
+    if do_align: 
+        # move every line by offset/2
+        image_aligned = np.zeros((image.shape[0], int(image.shape[1]+offset)))
 
-            i=0
-            while i < len(image)-1: # loop over each pair of lines to insert original data with offset
-                image_aligned[i, :-offset] = image[i, :]
-                image_aligned[i+1, offset:] = image[i+1]
-                i += 2
+        i=0
+        while i < len(image)-1: # loop over each pair of lines to insert original data with offset
+            image_aligned[i, :-offset] = image[i, :]
+            image_aligned[i+1, offset:] = image[i+1]
+            i += 2
 
-            image_aligned = image_aligned[:, 1:image_aligned.shape[1]-offset]
-            return offset, image_aligned
-
-    return offset
+        image_aligned = image_aligned[:, 1:image_aligned.shape[1]-offset]
+        return offset, image_aligned
+    else:
+        return offset
 
 def align_phase_stack(stack):
     """
