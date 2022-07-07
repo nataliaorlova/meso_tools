@@ -62,9 +62,52 @@ def get_roi_data(path_to_tiff):
     meta_data = tifffile.read_scanimage_metadata(open(path_to_tiff, 'rb'))
     return meta_data[1]
 
+def load_motion_corrected_movie(filepath, pages=None):
+    """load motion correctionmovie : whole or some pages
+    filepath :  str : absolute path to teh hdf5 file with movie
+    pages :  int : number of pages to load, if given
+    return : loaded movie as a 3D numpy array
+    """
+    motion_corrected_movie_file = h5py.File(filepath, 'r')
+    if not pages:        
+        motion_corrected_movie = motion_corrected_movie_file['data']
+    else:
+        motion_corrected_movie = motion_corrected_movie_file['data'][0:pages]
+    return motion_corrected_movie
+
 class LimsApi():
     def __init__(self, lims_credentials):
         self.lims_db = PostgresQueryMixin(
             dbname=lims_credentials['dbname'], user=lims_credentials['user'],
             host=lims_credentials['host'], password=lims_credentials['password'],
             port=lims_credentials['port'])
+        
+    def get_exp_folder(self, exp_id):
+        """get path to the storage directory for given experiment id
+        """
+        query = f"""SELECT
+                    oe.storage_directory as experiment_folder
+                    FROM ophys_experiments oe
+                    WHERE oe.id={exp_id}"""
+        exp_folder_pd = pd.read_sql(query, self.lims_db.get_connection())
+        if len(exp_folder_pd) != 0:
+            return exp_folder_pd.experiment_folder[0]
+        else: print(f"can't find folder for experiment {exp_id}")
+            
+    def get_motion_corrected_stack(self, exp_id):
+        """get path to the motion corrected stack for given experiment id
+        """
+        
+        query = f"""SELECT wkf.storage_directory || wkf.filename AS mc_stack_file
+                    FROM ophys_experiments oe
+                    JOIN well_known_files wkf ON wkf.attachable_id = oe.id
+                    JOIN well_known_file_types wkft
+                    ON wkft.id = wkf.well_known_file_type_id
+                    WHERE wkf.attachable_type = 'OphysExperiment'
+                    AND wkft.name = 'MotionCorrectedImageStack'
+                    AND oe.id = {exp_id};
+                    """
+        mc_file = pd.read_sql(query, self.lims_db.get_connection())
+        if len(mc_file) != 0:
+            return mc_file.mc_stack_file[0]
+        else: print(f"can't find motion corrected stack for experiment {exp_id}")
