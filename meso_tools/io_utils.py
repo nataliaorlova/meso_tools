@@ -69,11 +69,11 @@ def load_motion_corrected_movie(filepath, pages=None):
     pages :  int : number of pages to load, if given
     return : loaded movie as a 3D numpy array
     """
-    motion_corrected_movie_file = h5py.File(filepath, 'r')
-    if not pages:        
-        motion_corrected_movie = motion_corrected_movie_file['data']
-    else:
-        motion_corrected_movie = motion_corrected_movie_file['data'][0:pages]
+    with h5py.File(filepath, 'r') as motion_corrected_movie_file:
+        if not pages:        
+            motion_corrected_movie = motion_corrected_movie_file['data']
+        else:
+            motion_corrected_movie = motion_corrected_movie_file['data'][0:pages]
     return motion_corrected_movie
 
 class LimsApi():
