@@ -3,6 +3,7 @@
 
 import tifffile
 import h5py
+from allensdk.internal.api import PostgresQueryMixin
 
 def read_tiff(path_to_tiff, page_num=None):
     """ reads either entire tiff file, or if n is given, N pages of it
@@ -60,3 +61,10 @@ def get_roi_data(path_to_tiff):
     """
     meta_data = tifffile.read_scanimage_metadata(open(path_to_tiff, 'rb'))
     return meta_data[1]
+
+class LimsApi():
+    def __init__(self, lims_credentials):
+        self.lims_db = PostgresQueryMixin(
+            dbname=lims_credentials['dbname'], user=lims_credentials['user'],
+            host=lims_credentials['host'], password=lims_credentials['password'],
+            port=lims_credentials['port'])
