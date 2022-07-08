@@ -21,8 +21,9 @@ def read_tiff(path_to_tiff, page_num=None):
                 print(f"This timeseries has more than 5000 frames to not overload RAM, we will only read 5000 first pages.")
                 print(f"To read more pages,in case large amount of RAM is available, provide number of pages to read by calling read_tiff(path_to_tiff, page_num=value)")
                 page_num = 5000
-                with tifffile.TiffFile(path_to_tiff, mode ='rb') as tiff:
-                    tiff_array = tiff.asarray(range(0, page_num))
+                tiff_array = tiff.asarray(range(0, page_num))
+            else:
+                tiff_array = tiff.asarray()
     return tiff_array
 
 def write_tiff(path, data):
