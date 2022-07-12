@@ -52,7 +52,8 @@ if __name__ == '__main__':
             'numpy',
             'scipy',
             'matplotlib',
-            'scikit-image'
+            'scikit-image',
+            'allensdk'
 
         ],
         dependency_links = [],

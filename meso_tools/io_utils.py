@@ -9,12 +9,19 @@ from allensdk.internal.api import PostgresQueryMixin
 def read_tiff(path_to_tiff, page_num=None):
     """ reads either entire tiff file, or if n is given, N pages of it
         path_to_tiff: str: local path to the tifffile
-        page_num : int : number of pages to read, if none provide,d willa teempt to read entire tiff file. Will limlit to 5000 if tiff has more that 5000 pages.
+        page_num : int or list of 2 ints: number of pages to read, 
+        if none provided will atempt to read entire tiff file. 
+        Will limlit to 5000 if tiff has more that 5000 pages.
+        if list of 2 ints - will read pages fomr int 1 to int 2
     Return:
         tiff_array: 3D numpy array representing timeseries that was read
     """
     with tifffile.TiffFile(path_to_tiff, mode ='rb') as tiff:
         if page_num: 
+            if isinstance(page_num, list):
+                #read pages from range
+                tiff_array = tiff.asarray(range(page_num[0], page_num[1]))
+            else:
                 tiff_array = tiff.asarray(range(0, page_num))
         else: # number of pages is not provided: 
             if len(tiff.pages) >=5000:
