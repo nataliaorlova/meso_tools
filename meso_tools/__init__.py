@@ -9,6 +9,6 @@ from . image_tools import get_pixel_hist2d as get_pixel_hist2d
 from . image_tools import im_plot as im_plot
 from . image_tools import plot_all_colormaps as plot_all_colormaps
 from . image_tools import average_intensity as average_intensity
-from . image_tools import aling_phase as aling_phase
+from . image_tools import align_phase as aling_phase
 from . image_tools import align_phase_stack as align_phase_stack
 from . image_tools import average_n as average_n
