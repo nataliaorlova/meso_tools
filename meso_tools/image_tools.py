@@ -123,20 +123,23 @@ def align_phase_stack(stack):
     # calculate mean offset in the stack:
     offsets = []
     for page in stack:
-        offset = aling_phase(page, do_align = False)
+        offset = mt.aling_phase(page, do_align = False)
         offsets.append(offset)
-    offset = int(np.round(np.mean(offsets)))
-    
-    # align all images in stack using mean offset: 
-    stack_aligned = np.zeros((stack.shape[0], stack.shape[1], stack.shape[2]-offset+1))
-    
-    if offset != 0:
-        for i, page in enumerate(stack):
-            _, page_aligned = aling_phase(page, offset = offset)
-            stack_aligned[i] = page_aligned
-        return stack_aligned
+    mean_offset = int(np.round(np.mean(offsets)))
+    max_offset = np.max(offsets)
+    # align all images in stack using mean or max offset: 
+
+    if mean_offset !=0:
+        offset = mean_offset
     else:
-        return stack
+        offset = max_offset
+
+    stack_aligned = np.zeros((stack.shape[0], stack.shape[1], stack.shape[2]-offset))
+
+    for i, page in enumerate(stack):
+        _, page_aligned = mt.aling_phase(page, offset = offset)
+        stack_aligned[i] = page_aligned
+    return stack_aligned
 
 def average_n(array, n):
     """averages every N frames of the timeseries
