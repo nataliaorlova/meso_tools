@@ -152,3 +152,26 @@ def average_n(array, n):
     reshaped_array = array.reshape(n, int(array.shape[0]/n), array.shape[1], array.shape[2])
     avg_array = reshaped_array.mean(axis=0)
     return avg_array
+
+def image_negative_rescale(data):
+    """
+    mapping image to non-negative range
+    data: image as 2D nupmy array
+    return: data_out: image with pixel values remapped to a non-negative range
+    """
+    # rescale image histogram to non negative range
+    max_intensity = np.max(data)
+    min_intensity = np.min(data)
+    data_out = ((data - min_intensity)*2**16/(max_intensity-min_intensity)).astype(np.uint16)
+    return data_out
+
+def image_downsample(data, scaling_factor):
+    """
+    donwssampling image data according ot the sampling factor
+    data: 2d numpy array representing the image
+    sampling factor: float
+    return: downsampled image in a numpy array
+    """
+    data_scaled_shape = np.asarray(data.shape / scaling_factor, dtype=int)
+    data_scaled = (resize(data, data_scaled_shape)*2**16).astype(np.uint16)
+    return data_scaled
