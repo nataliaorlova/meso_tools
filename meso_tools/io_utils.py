@@ -125,7 +125,7 @@ class LimsApi():
         """
         query = (f"""SELECT * FROM {table_name} WHERE 1=0""")
         table_columns = pd.read_sql(query, self.lims_db.get_connection())
-        return table_columns
+        return table_columns.columns.values
 
     def get_all_distinct_values_in_column(self, table, column):
         """get all distinct values in column/table
@@ -145,5 +145,5 @@ class LimsApi():
         JOIN ophys_sessions ON ophys_experiments.ophys_session_id = ophys_sessions.id
         JOIN specimens ON ophys_sessions.specimen_id = specimens.id
         JOIN projects p ON p.id = ophys_sessions.project_id
-        WHERE p.code = '{project}' ;"""
+        WHERE p.code = '{project}' AND ophys_experiments.workflow_state = 'passed' ;"""
         return pd.read_sql(query, self.lims_db.get_connection())
