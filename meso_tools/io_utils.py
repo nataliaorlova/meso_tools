@@ -137,16 +137,17 @@ class LimsApi():
         """get alal epxeriments, their deths and specimen name for given project code
         """
         query = f"""SELECT 
-        ophys_experiments.id AS exp_id,
-        ophys_sessions.id AS session_id,
-        ophys_experiments.experiment_container_id AS container_id,
+        oe.id AS exp_id,
+        os.id AS session_id,
+        oevbec.visual_behavior_experiment_container_id AS container_id,
         imaging_depths.depth AS depth,
         specimens.name AS specimen
-        FROM ophys_experiments  
-        JOIN imaging_depths ON imaging_depths.id = ophys_experiments.imaging_depth_id
-        JOIN ophys_sessions ON ophys_experiments.ophys_session_id = ophys_sessions.id
+        FROM ophys_experiments oe  
+        JOIN imaging_depths ON imaging_depths.id = oe.imaging_depth_id
+        JOIN ophys_sessions os ON oe.ophys_session_id = os.id
         JOIN specimens ON ophys_sessions.specimen_id = specimens.id
-        JOIN projects p ON p.id = ophys_sessions.project_id
+        JOIN projects p ON p.id = os.project_id
+        JOIN ophys_experiments_visual_behavior_experiment_containers oevbec ON oevbec.ophys_experiment_id = oe.id
         WHERE p.code = '{project}' AND ophys_experiments.workflow_state = 'passed' ;"""
         return pd.read_sql(query, self.lims_db.get_connection())
 
