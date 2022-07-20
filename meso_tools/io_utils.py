@@ -149,3 +149,11 @@ class LimsApi():
         JOIN projects p ON p.id = ophys_sessions.project_id
         WHERE p.code = '{project}' AND ophys_experiments.workflow_state = 'passed' ;"""
         return pd.read_sql(query, self.lims_db.get_connection())
+
+    def get_all_lims_tables(self):
+        query = """SELECT table_name
+                FROM information_schema.tables
+                WHERE table_schema='public'
+                AND table_type='BASE TABLE';"""
+        tables = pd.read_sql(query, self.lims_db.get_connection()).table_name.values
+        return tables        
