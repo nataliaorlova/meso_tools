@@ -4,7 +4,7 @@
 import tifffile
 import h5py
 import pandas as pd
-# from allensdk.internal.api import PostgresQueryMixin
+from allensdk.internal.api import PostgresQueryMixin
 
 def read_tiff(path_to_tiff, page_num=None):
     """ reads either entire tiff file, or if n is given, N pages of it
@@ -84,39 +84,68 @@ def load_motion_corrected_movie(filepath, pages=None):
             motion_corrected_movie = motion_corrected_movie_file['data'][0:pages]
     return motion_corrected_movie
 
-# class LimsApi():
-#     def __init__(self, lims_credentials):
-#         self.lims_db = PostgresQueryMixin(
-#             dbname=lims_credentials['dbname'], user=lims_credentials['user'],
-#             host=lims_credentials['host'], password=lims_credentials['password'],
-#             port=lims_credentials['port'])
+class LimsApi():
+    def __init__(self, lims_credentials):
+        self.lims_db = PostgresQueryMixin(
+            dbname=lims_credentials['dbname'], user=lims_credentials['user'],
+            host=lims_credentials['host'], password=lims_credentials['password'],
+            port=lims_credentials['port'])
         
-#     def get_exp_folder(self, exp_id):
-#         """get path to the storage directory for given experiment id
-#         """
-#         query = f"""SELECT
-#                     oe.storage_directory as experiment_folder
-#                     FROM ophys_experiments oe
-#                     WHERE oe.id={exp_id}"""
-#         exp_folder_pd = pd.read_sql(query, self.lims_db.get_connection())
-#         if len(exp_folder_pd) != 0:
-#             return exp_folder_pd.experiment_folder[0]
-#         else: print(f"can't find folder for experiment {exp_id}")
+    def get_exp_folder(self, exp_id):
+        """get path to the storage directory for given experiment id
+        """
+        query = f"""SELECT
+                    oe.storage_directory as experiment_folder
+                    FROM ophys_experiments oe
+                    WHERE oe.id={exp_id}"""
+        exp_folder_pd = pd.read_sql(query, self.lims_db.get_connection())
+        if len(exp_folder_pd) != 0:
+            return exp_folder_pd.experiment_folder[0]
+        else: print(f"can't find folder for experiment {exp_id}")
             
-#     def get_motion_corrected_stack(self, exp_id):
-#         """get path to the motion corrected stack for given experiment id
-#         """
-        
-#         query = f"""SELECT wkf.storage_directory || wkf.filename AS mc_stack_file
-#                     FROM ophys_experiments oe
-#                     JOIN well_known_files wkf ON wkf.attachable_id = oe.id
-#                     JOIN well_known_file_types wkft
-#                     ON wkft.id = wkf.well_known_file_type_id
-#                     WHERE wkf.attachable_type = 'OphysExperiment'
-#                     AND wkft.name = 'MotionCorrectedImageStack'
-#                     AND oe.id = {exp_id};
-#                     """
-#         mc_file = pd.read_sql(query, self.lims_db.get_connection())
-#         if len(mc_file) != 0:
-#             return mc_file.mc_stack_file[0]
-#         else: print(f"can't find motion corrected stack for experiment {exp_id}")
+    def get_motion_corrected_stack(self, exp_id):
+        """get path to the motion corrected stack for given experiment id
+        """
+        query = f"""SELECT wkf.storage_directory || wkf.filename AS mc_stack_file
+                    FROM ophys_experiments oe
+                    JOIN well_known_files wkf ON wkf.attachable_id = oe.id
+                    JOIN well_known_file_types wkft
+                    ON wkft.id = wkf.well_known_file_type_id
+                    WHERE wkf.attachable_type = 'OphysExperiment'
+                    AND wkft.name = 'MotionCorrectedImageStack'
+                    AND oe.id = {exp_id};
+                    """
+        mc_file = pd.read_sql(query, self.lims_db.get_connection())
+        if len(mc_file) != 0:
+            return mc_file.mc_stack_file[0]
+        else: print(f"can't find motion corrected stack for experiment {exp_id}")
+    
+    def get_all_table_columns(self, table_name):
+        """get all columns in given LIMS table
+        """
+        query = (f"""SELECT * FROM {table_name} WHERE 1=0""")
+        table_columns = pd.read_sql(query, self.lims_db.get_connection())
+        if len(table_columns) != 0:
+            return table_columns
+        else: print(f"Can't find any columns in table {table_name}")
+
+    def get_all_distinct_values_in_column(self, table, column):
+        """get all distinct values in column/table
+        """
+        query = (f"""SELECT {column} FROM {table} GROUP BY {column} """)
+        return pd.read_sql(query, self.lims_db.get_connection())
+
+    def get_experiments_in_project(self, project):
+        """get alal epxeriments, their deths and specimen name for given project code
+        """
+        query = f"""SELECT 
+        ophys_experiments.id as exp_id, 
+        imaging_depths.depth as depth,
+        specimens.name as specimen
+        FROM ophys_experiments  
+        JOIN imaging_depths ON imaging_depths.id = ophys_experiments.imaging_depth_id
+        JOIN ophys_sessions ON ophys_experiments.ophys_session_id = ophys_sessions.id
+        JOIN specimens ON ophys_sessions.specimen_id = specimens.id
+        JOIN projects p ON p.id = ophys_sessions.project_id
+        WHERE p.code = '{project}' ;"""
+        return pd.read_sql(query, self.lims_db.get_connection())
