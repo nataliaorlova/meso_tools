@@ -139,7 +139,7 @@ class LimsApi():
         query = f"""SELECT 
         ophys_experiments.id AS exp_id,
         ophys_sessions.id AS session_id,
-        ophys_experiments.experiment_container_id AS container id
+        ophys_experiments.experiment_container_id AS container_id,
         imaging_depths.depth AS depth,
         specimens.name AS specimen
         FROM ophys_experiments  
