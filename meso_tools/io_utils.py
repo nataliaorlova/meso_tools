@@ -125,9 +125,7 @@ class LimsApi():
         """
         query = (f"""SELECT * FROM {table_name} WHERE 1=0""")
         table_columns = pd.read_sql(query, self.lims_db.get_connection())
-        if len(table_columns) != 0:
-            return table_columns
-        else: print(f"Can't find any columns in table {table_name}")
+        return table_columns
 
     def get_all_distinct_values_in_column(self, table, column):
         """get all distinct values in column/table
