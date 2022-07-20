@@ -137,7 +137,8 @@ class LimsApi():
         """get alal epxeriments, their deths and specimen name for given project code
         """
         query = f"""SELECT 
-        ophys_experiments.id as exp_id, 
+        ophys_experiments.id as exp_id,
+        ophys_sessions.id as session_id,
         imaging_depths.depth as depth,
         specimens.name as specimen
         FROM ophys_experiments  
