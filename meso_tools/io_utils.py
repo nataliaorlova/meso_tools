@@ -145,10 +145,10 @@ class LimsApi():
         FROM ophys_experiments oe  
         JOIN imaging_depths ON imaging_depths.id = oe.imaging_depth_id
         JOIN ophys_sessions os ON oe.ophys_session_id = os.id
-        JOIN specimens ON ophys_sessions.specimen_id = specimens.id
+        JOIN specimens ON os.specimen_id = specimens.id
         JOIN projects p ON p.id = os.project_id
         JOIN ophys_experiments_visual_behavior_experiment_containers oevbec ON oevbec.ophys_experiment_id = oe.id
-        WHERE p.code = '{project}' AND ophys_experiments.workflow_state = 'passed' ;"""
+        WHERE p.code = '{project}' AND oe.workflow_state = 'passed' ;"""
         return pd.read_sql(query, self.lims_db.get_connection())
 
     def get_all_lims_tables(self):
