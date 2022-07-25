@@ -176,3 +176,8 @@ def image_downsample(data, scaling_factor):
     data_scaled_shape = np.asarray(data.shape / scaling_factor, dtype=int)
     data_scaled = (resize(data, data_scaled_shape)*2**16).astype(np.uint16)
     return data_scaled
+
+def offset_to_zero(im):
+    imin = im.min()
+    im_offset = im-imin
+    return im_offset
