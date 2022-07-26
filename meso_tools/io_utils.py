@@ -80,8 +80,10 @@ def load_motion_corrected_movie(filepath, pages=None):
     with h5py.File(filepath, 'r') as motion_corrected_movie_file:
         if not pages:        
             motion_corrected_movie = motion_corrected_movie_file['data']
-        else:
-            motion_corrected_movie = motion_corrected_movie_file['data'][0:pages]
+        elif pages > 0:
+            motion_corrected_movie = motion_corrected_movie_file['data'][:pages]
+        else: 
+            motion_corrected_movie = motion_corrected_movie_file['data'][pages:]
     return motion_corrected_movie
 
 class LimsApi():
