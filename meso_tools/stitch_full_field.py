@@ -59,7 +59,7 @@ def check_meta(meta_dict):
     2. only channel 1 is set to be saved
     3. all ROIs are in non-discrete mode 
     """
-    assert meta_dict['channel_save'] == 1, f"More than 1 channel is set ot be saved when data acquired, unable to split"
+    assert isinstance(meta_dict['channel_save'], int), f"More than 1 channel is set ot be saved when data acquired, unable to split"
     assert meta_dict['stack_type'] == 'uniform', f"stack is of wrong type, unable to split"
 
     # check that all ROIs are in discrete plane mode
