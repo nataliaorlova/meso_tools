@@ -181,3 +181,65 @@ def offset_to_zero(im):
     imin = im.min()
     im_offset = im-imin
     return im_offset
+
+def image_contrast(image, percentile_max=95, percentile_min=5):
+    """Compute contrast of an image.
+    Parameters
+    ----------
+    image : numpy.ndarray, (N, M)
+        Image to compute contrast of.
+    percentile_max : int
+        Percentile at which to compute maximum value of the image
+    percentile_min : int
+        Percentile at which to compute minimum value of the image
+    Returns
+    -------
+    acutance : float
+        Acutance of the image.
+    """
+    Imax = np.percentile(image, percentile_max)
+    Imin = np.percentile(image, percentile_min)
+    c = (Imax-Imin)/(Imax+Imin)
+    return c
+
+def compute_acutance(image: np.ndarray,
+                     cut_y: int = 0,
+                     cut_x: int = 0) -> float:
+    """Compute the acutance (sharpness) of an image.
+    Parameters
+    ----------
+    image : numpy.ndarray, (N, M)
+        Image to compute acutance of.
+    cut_y : int
+        Number of pixels to cut from the begining and end of the y axis.
+    cut_x : int
+        Number of pixels to cut from the begining and end of the x axis.
+    Returns
+    -------
+    acutance : float
+        Acutance of the image.
+    """
+    if cut_y <= 0 and cut_x <= 0:
+        cut_image = image
+    elif cut_y > 0 and cut_x <= 0:
+        cut_image = image[cut_y:-cut_y, :]
+    elif cut_y <= 0 and cut_x > 0:
+        cut_image = image[:, cut_x:-cut_x]
+    else:
+        cut_image = image[cut_y:-cut_y, cut_x:-cut_x]
+    grady, gradx = np.gradient(cut_image)
+    return (grady ** 2 + grady ** 2).mean()
+
+def compute_basic_snr(image: np.ndarray):
+    """Compute basic SNR of an image as defined by standard deviation / mean of the image
+    Parameters
+    ----------
+    image : numpy.ndarray, (N, M)
+        Image to compute SNR of.
+    Returns
+    -------
+    basic_snr : float
+        Basic SNR of an image.
+    """
+    basic_snr = np.std(image.flatten())/np.mean(image.flatten())
+    return basic_snr
