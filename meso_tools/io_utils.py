@@ -182,5 +182,5 @@ class LimsApi():
             JOIN ophys_sessions os ON os.specimen_id = sp.id
             JOIN ophys_experiments oe ON oe.ophys_session_id = os.id
             JOIN ophys_experiments_visual_behavior_experiment_containers oevbec ON oevbec.ophys_experiment_id = oe.id
-            WHERE sp.external_specimen_name = '{mouse_id}' """
-        return pd.read_sql(query, self.lims_db.get_connection())     
+            WHERE sp.external_specimen_name = '{mouse_id}' AND oe.workflow_state = 'passed' """
+        return pd.read_sql(query, self.lims_db.get_connection())      
