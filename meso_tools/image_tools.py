@@ -241,5 +241,5 @@ def compute_basic_snr(image: np.ndarray):
     basic_snr : float
         Basic SNR of an image.
     """
-    basic_snr = np.std(image.flatten())/np.mean(image.flatten())
+    basic_snr = np.mean(image.flatten())/np.std(image.flatten())
     return basic_snr
