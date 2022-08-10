@@ -159,4 +159,28 @@ class LimsApi():
                 WHERE table_schema='public'
                 AND table_type='BASE TABLE';"""
         tables = pd.read_sql(query, self.lims_db.get_connection()).table_name.values
-        return tables        
+        return tables   
+
+    def get_sessions_per_mouse_id(self, mouse_id):
+        """
+        Get all sessions and experiments per given mouse_id
+        Parameters
+        ----------
+        mouse_id : int
+            LabTracks mouse ID from specimens table, specimens.external_specimen_id
+        Returns
+        -------
+        dataframe : pd.dataframe
+            pandas dataframe w columns [mouse_id, session_id, experiment_id, container_id]
+        """
+        query = f"""SELECT
+            sp.external_specimen_name as mouse_id,
+            os.id AS session_id,
+            oe.id AS exp_id,
+            oevbec.visual_behavior_experiment_container_id AS container_id
+            FROM specimens sp 
+            JOIN ophys_sessions os ON os.specimen_id = sp.id
+            JOIN ophys_experiments oe ON oe.ophys_session_id = os.id
+            JOIN ophys_experiments_visual_behavior_experiment_containers oevbec ON oevbec.ophys_experiment_id = oe.id
+            WHERE sp.external_specimen_name = '{mouse_id}' """
+        return pd.read_sql(query, self.lims_db.get_connection())     
