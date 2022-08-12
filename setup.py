@@ -53,7 +53,9 @@ if __name__ == '__main__':
             'scipy',
             'matplotlib',
             'scikit-image',
-            'allensdk'
+            'pandas',
+            'skimage',
+            'sciris'
 
         ],
         dependency_links = [],

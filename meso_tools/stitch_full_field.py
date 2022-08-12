@@ -24,8 +24,8 @@
 from matplotlib import path
 from meso_tools.io_utils import read_si_metadata as get_meta
 from meso_tools.io_utils import read_tiff, write_tiff
+from meso_tools.image_tools import image_negative_rescale, image_downsample
 import numpy as np
-from skimage.transform import  resize
 
 GAP = 24
 
@@ -167,7 +167,7 @@ def stitch_tiff(averaged_tiff, meta_dict, output_tiff_shape):
     cut_bottom_left = np.array([[(i+1)*(roi_sizes[i][1]) + i*GAP, roi_sizes[i][0]] for i, roi in enumerate(rois)])
 
     for i, _ in enumerate(rois):
-        averaged_tiff = im_negative_rescale(averaged_tiff)
+        averaged_tiff = image_negative_rescale(averaged_tiff)
         image_to_insert = averaged_tiff[cut_top_right[i][0]:cut_bottom_left[i][0], cut_top_right[i][1]:cut_bottom_left[i][1]]
         stitched_tiff[insert_top_right[i][0]:insert_bottom_left[i][0], insert_top_right[i][1]:insert_bottom_left[i][1]] = image_to_insert
 
@@ -189,29 +189,6 @@ def split_surface(path_to_surface):
         surface_meta_dict['rois'][i]['array'] = surface_averaged[i, :,:]
 
     return surface_meta_dict, surface_averaged
-
-def im_negative_rescale(data):
-    """
-    mapping image to non-negative range
-    data: inmage as 2D nupmy array
-    return: data_out: remapped image
-    """
-    # rescale image histogram to non negative range
-    max_intensity = np.max(data)
-    min_intensity = np.min(data)
-    data_out = ((data - min_intensity)*2**16/(max_intensity-min_intensity)).astype(np.uint16)
-    return data_out
-
-def data_downsample(data, scaling_factor):
-    """
-    donwssampling image data according ot the sampling factor
-    data: 2d numpy array representing the image
-    sampling factor: float
-    return: downsampled image in a numpy array
-    """
-    data_scaled_shape = np.asarray(data.shape / scaling_factor, dtype=int)
-    data_scaled = (resize(data, data_scaled_shape)*2**16).astype(np.uint16)
-    return data_scaled
 
 
 def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
@@ -239,8 +216,8 @@ def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
     # downsampling 
     for i, roi in enumerate(split_surface_meta["rois"]):
         a = roi['array']
-        b = im_negative_rescale(a)
-        c = data_downsample(b, convert_factor)
+        b = image_negative_rescale(a)
+        c = image_downsample(b, convert_factor)
         roi['downsampled_array'] = c
     
     for roi in split_surface_meta["rois"]:

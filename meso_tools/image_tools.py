@@ -6,6 +6,7 @@ import scipy.stats
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from skimage import io
+from skimage.transform import resize
 import tifffile as tiff
 import glob
 
@@ -152,3 +153,93 @@ def average_n(array, n):
     reshaped_array = array.reshape(n, int(array.shape[0]/n), array.shape[1], array.shape[2])
     avg_array = reshaped_array.mean(axis=0)
     return avg_array
+
+def image_negative_rescale(data):
+    """
+    mapping image to non-negative range
+    data: image as 2D nupmy array
+    return: data_out: image with pixel values remapped to a non-negative range
+    """
+    # rescale image histogram to non negative range
+    max_intensity = np.max(data)
+    min_intensity = np.min(data)
+    data_out = ((data - min_intensity)*2**16/(max_intensity-min_intensity)).astype(np.uint16)
+    return data_out
+
+def image_downsample(data, scaling_factor):
+    """
+    donwssampling image data according ot the sampling factor
+    data: 2d numpy array representing the image
+    sampling factor: float
+    return: downsampled image in a numpy array
+    """
+    data_scaled_shape = np.asarray(data.shape / scaling_factor, dtype=int)
+    data_scaled = (resize(data, data_scaled_shape)*2**16).astype(np.uint16)
+    return data_scaled
+
+def offset_to_zero(im):
+    imin = im.min()
+    im_offset = im-imin
+    return im_offset
+
+def image_contrast(image, percentile_max=95, percentile_min=5):
+    """Compute contrast of an image.
+    Parameters
+    ----------
+    image : numpy.ndarray, (N, M)
+        Image to compute contrast of.
+    percentile_max : int
+        Percentile at which to compute maximum value of the image
+    percentile_min : int
+        Percentile at which to compute minimum value of the image
+    Returns
+    -------
+    acutance : float
+        Acutance of the image.
+    """
+    Imax = np.percentile(image, percentile_max)
+    Imin = np.percentile(image, percentile_min)
+    c = (Imax-Imin)/(Imax+Imin)
+    return c
+
+def compute_acutance(image: np.ndarray,
+                     cut_y: int = 0,
+                     cut_x: int = 0) -> float:
+    """Compute the acutance (sharpness) of an image.
+    Parameters
+    ----------
+    image : numpy.ndarray, (N, M)
+        Image to compute acutance of.
+    cut_y : int
+        Number of pixels to cut from the begining and end of the y axis.
+    cut_x : int
+        Number of pixels to cut from the begining and end of the x axis.
+    Returns
+    -------
+    acutance : float
+        Acutance of the image.
+    """
+    if cut_y <= 0 and cut_x <= 0:
+        cut_image = image
+    elif cut_y > 0 and cut_x <= 0:
+        cut_image = image[cut_y:-cut_y, :]
+    elif cut_y <= 0 and cut_x > 0:
+        cut_image = image[:, cut_x:-cut_x]
+    else:
+        cut_image = image[cut_y:-cut_y, cut_x:-cut_x]
+    grady, gradx = np.gradient(cut_image)
+    return (grady ** 2 + grady ** 2).mean()
+
+def compute_basic_snr(image: np.ndarray):
+    """Compute basic SNR of an image as defined by standard deviation / mean of the image
+    Parameters
+    ----------
+    image : numpy.ndarray, (N, M)
+        Image to compute SNR of.
+    Returns
+    -------
+    basic_snr : float
+        Basic SNR of an image.
+    """
+    basic_snr = np.mean(image.flatten())/np.std(image.flatten())
+    return basic_snr
