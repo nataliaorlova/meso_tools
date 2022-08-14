@@ -54,10 +54,10 @@ if __name__ == '__main__':
             'matplotlib',
             'scikit-image',
             'pandas',
-            'skimage',
-            'sciris'
+            'glob',
+            'sciris',
+            'allensdk==2.11.3'],
 
-        ],
         dependency_links = [],
         zip_safe = True,
         cmdclass = {'install': install},
