@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from skimage import io
 from skimage.transform import resize
+from skimage.util import view_as_blocks
 import tifffile as tiff
 import glob
 
@@ -272,3 +273,45 @@ def compute_photon_flux(image: np.ndarray, stack=False):
     else:
         photon_flux = np.sqrt(np.mean(image.flatten()))
         return photon_flux
+
+def compute_block_snr(img, block_shape, blocks_to_agg, return_block, snr_metric = "basic"):
+    """Compute the SNR of nonoverlapping blocks of an image, return aggregate
+    SNR from certrain blocks.
+    
+    Parameters
+    ----------
+    img : np.ndarray
+        Image to compute SNR of.
+    block_shape : tuple(int,int)
+        Shape of blocks to compute SNR of.
+    snr_metric : str
+        Type of SNR metric to compute.
+    blocks_to_agg : tuple(int,int)
+        Start and end index of block to aggregate SNR (e.g (6,10) will aggregate
+        the middle 5 blocks if 16 is chosen).
+    return_block : bool
+        If True, return the blocks used to compute SNR.
+
+    Returns
+    -------
+    mean_block_snr : float
+        Mean SNR of blocks.
+    """
+    view = view_as_blocks(img, block_shape=block_shape)
+
+    # calculate basic SNR. TODO: add more metrics
+    if snr_metric == "basic":
+        block_snr = mt.compute_basic_snr(view, stack=True)
+    if snr_metric == "photon_flux":
+        block_snr = mt.compute_photon_flux(view, stack=True)
+    if snr_metric == "acutance":
+        block_snr = mt.compute_acutance(view, stack=True)
+    
+    s,e = blocks_to_agg
+    mid_snr_blocks = np.sort(block_snr)[s:e]
+    mean_block_snr = np.mean(mid_snr_blocks)
+
+    if return_block:
+        return block_snr, mean_block_snr
+    else:
+        return mean_block_snr
