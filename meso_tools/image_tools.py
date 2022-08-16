@@ -301,11 +301,11 @@ def compute_block_snr(img, block_shape, blocks_to_agg, return_block, snr_metric 
 
     # calculate basic SNR. TODO: add more metrics
     if snr_metric == "basic":
-        block_snr = mt.compute_basic_snr(view, stack=True)
+        block_snr = compute_basic_snr(view, stack=True)
     if snr_metric == "photon_flux":
-        block_snr = mt.compute_photon_flux(view, stack=True)
+        block_snr = compute_photon_flux(view, stack=True)
     if snr_metric == "acutance":
-        block_snr = mt.compute_acutance(view, stack=True)
+        block_snr = compute_acutance(view, stack=True)
     
     s,e = blocks_to_agg
     mid_snr_blocks = np.sort(block_snr)[s:e]
