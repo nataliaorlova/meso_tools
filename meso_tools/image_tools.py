@@ -270,5 +270,3 @@ def compute_photon_flux(image: np.ndarray, stack=False):
     else:
         photon_flux = np.sqrt(np.mean(image.flatten()))
     return photon_flux
-
-def 
