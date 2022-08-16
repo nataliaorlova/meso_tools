@@ -248,10 +248,10 @@ def compute_basic_snr(image: np.ndarray, stack=False):
     """
     if stack: 
         basic_snr = np.std(image, axis=(2,3))/np.mean(image, axis=(2,3))
-
+        return list(basic_snr.flatten())
     else: 
         basic_snr = np.std(image)/np.mean(image)
-    return basic_snr
+        return basic_snr
 
 def compute_photon_flux(image: np.ndarray, stack=False):
     """Compute photon flux a 2P image as defined by sqrt(mean pixel valu in image)
@@ -271,4 +271,4 @@ def compute_photon_flux(image: np.ndarray, stack=False):
         return list(photon_flux.flatten())
     else:
         photon_flux = np.sqrt(np.mean(image.flatten()))
-        return list(photon_flux)
+        return photon_flux
