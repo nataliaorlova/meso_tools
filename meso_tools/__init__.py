@@ -18,5 +18,6 @@ from . image_tools import compute_acutance as compute_acutance
 from . image_tools import offset_to_zero as offset_to_zero
 from . image_tools import image_downsample as image_downsample
 from . image_tools import image_negative_rescale as image_negative_rescale
-from . image_tools import image_contrast as image_contrast
+from . image_tools import compute_contrast as compute_contrast
 from . image_tools import compute_basic_snr as compute_basic_snr
+from . image_tools import compute_photon_flux as compute_photon_flux
