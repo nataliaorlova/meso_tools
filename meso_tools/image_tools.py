@@ -266,7 +266,7 @@ def compute_photon_flux(image: np.ndarray, stack=False):
         photon flux of an image.
     """
     if stack:
-        photon_flux = np.sqrt(np.mean(tiff.flatten(), axis=2))
+        photon_flux = np.sqrt(np.mean(image.flatten(), axis=2))
     else:
-        photon_flux = np.sqrt(np.mean(tiff.flatten()))
+        photon_flux = np.sqrt(np.mean(image.flatten()))
     return photon_flux
