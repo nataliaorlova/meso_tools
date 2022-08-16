@@ -182,7 +182,7 @@ def offset_to_zero(im):
     im_offset = im-imin
     return im_offset
 
-def image_contrast(image, percentile_max=95, percentile_min=5):
+def image_contrast(image, percentile_max=95, percentile_min=5, stack = False):
     """Compute contrast of an image.
     Parameters
     ----------
@@ -197,9 +197,14 @@ def image_contrast(image, percentile_max=95, percentile_min=5):
     acutance : float
         Acutance of the image.
     """
-    Imax = np.percentile(image, percentile_max)
-    Imin = np.percentile(image, percentile_min)
-    c = (Imax-Imin)/(Imax+Imin)
+    if stack:
+        Imax = np.percentile(img, percentile_max, axis=2)
+        Imin = np.percentile(img, percentile_min, axis=2)
+        c = (Imax-Imin)/(Imax+Imin)
+    else:
+        Imax = np.percentile(image, percentile_max)
+        Imin = np.percentile(image, percentile_min)
+        c = (Imax-Imin)/(Imax+Imin)
     return c
 
 def compute_acutance(image: np.ndarray,
@@ -230,7 +235,7 @@ def compute_acutance(image: np.ndarray,
     grady, gradx = np.gradient(cut_image)
     return (grady ** 2 + grady ** 2).mean()
 
-def compute_basic_snr(image: np.ndarray):
+def compute_basic_snr(image: np.ndarray, stack=False):
     """Compute basic SNR of an image as defined by standard deviation / mean of the image
     Parameters
     ----------
@@ -241,5 +246,27 @@ def compute_basic_snr(image: np.ndarray):
     basic_snr : float
         Basic SNR of an image.
     """
-    basic_snr = np.mean(image.flatten())/np.std(image.flatten())
+    if stack: 
+        basic_snr = np.mean(image.flatten(), axis=2)/np.std(image.flatten(), axis=2)
+    else: 
+        basic_snr = np.mean(image.flatten())/np.std(image.flatten())
     return basic_snr
+
+def compute_photon_flux(image: np.ndarray, stack=False):
+    """Compute photon flux a 2P image as defined by sqrt(mean pixel valu in image)
+    Parameters
+    ----------
+    image : numpy.ndarray, (N, M)
+        Image to compute phootn flux of.
+    stack : bool, 
+        Falg of whether input is a stakc of images (2D array) or a single image (2D array) 
+    Returns
+    -------
+    photon_flux : float
+        photon flux of an image.
+    """
+    if stack:
+        photon_flux = np.sqrt(np.mean(tiff.flatten(), axis=2))
+    else:
+        photon_flux = np.sqrt(np.mean(tiff.flatten()))
+    return photon_flux
