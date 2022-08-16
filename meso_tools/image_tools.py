@@ -207,33 +207,33 @@ def image_contrast(image, percentile_max=95, percentile_min=5, stack = False):
         c = (Imax-Imin)/(Imax+Imin)
     return c
 
-def compute_acutance(image: np.ndarray,
-                     cut_y: int = 0,
-                     cut_x: int = 0) -> float:
+def compute_acutance(image: np.ndarray, stack = False) -> float:
     """Compute the acutance (sharpness) of an image.
     Parameters
     ----------
     image : numpy.ndarray, (N, M)
         Image to compute acutance of.
-    cut_y : int
-        Number of pixels to cut from the begining and end of the y axis.
-    cut_x : int
-        Number of pixels to cut from the begining and end of the x axis.
+    stack : bool
+        flag of whether to treat input as a stack fo images
     Returns
     -------
     acutance : float
         Acutance of the image.
     """
-    if cut_y <= 0 and cut_x <= 0:
-        cut_image = image
-    elif cut_y > 0 and cut_x <= 0:
-        cut_image = image[cut_y:-cut_y, :]
-    elif cut_y <= 0 and cut_x > 0:
-        cut_image = image[:, cut_x:-cut_x]
+    
+    if stack: 
+        accutance = []
+        for i in range(image.shape[0]):
+            for j in range(image.shape[1]):
+                block = image[i,j,:,:]
+                grady, gradx = np.gradient(block)
+                a = (grady ** 2 + gradx ** 2).mean()
+                accutance.append(a)
     else:
-        cut_image = image[cut_y:-cut_y, cut_x:-cut_x]
-    grady, gradx = np.gradient(cut_image)
-    return (grady ** 2 + grady ** 2).mean()
+        grady, gradx = np.gradient(image)
+        accutance = (grady ** 2 + gradx ** 2).mean()
+    
+    return accutance
 
 def compute_basic_snr(image: np.ndarray, stack=False):
     """Compute basic SNR of an image as defined by standard deviation / mean of the image
