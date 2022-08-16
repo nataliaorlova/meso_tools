@@ -182,7 +182,7 @@ def offset_to_zero(im):
     im_offset = im-imin
     return im_offset
 
-def image_contrast(image, percentile_max=95, percentile_min=5, stack = False):
+def compute_contrast(image, percentile_max=95, percentile_min=5, stack = False):
     """Compute contrast of an image.
     Parameters
     ----------
