@@ -285,7 +285,7 @@ def compute_block_snr(img, block_shape, blocks_to_agg, return_block, snr_metric 
     block_shape : tuple(int,int)
         Shape of blocks to compute SNR of.
     snr_metric : str
-        Type of SNR metric to compute.
+        Type of SNR metric to compute, for now has to be one from thsi list ["basic", "acutance", "photon_flux"]
     blocks_to_agg : tuple(int,int)
         Start and end index of block to aggregate SNR (e.g (6,10) will aggregate
         the middle 5 blocks if 16 is chosen).

@@ -183,4 +183,13 @@ class LimsApi():
             JOIN ophys_experiments oe ON oe.ophys_session_id = os.id
             JOIN ophys_experiments_visual_behavior_experiment_containers oevbec ON oevbec.ophys_experiment_id = oe.id
             WHERE sp.external_specimen_name = '{mouse_id}' AND oe.workflow_state = 'passed' """
-        return pd.read_sql(query, self.lims_db.get_connection())      
+        return pd.read_sql(query, self.lims_db.get_connection())  
+
+    def get_ROI_number_per_experiment(self, exp_id):
+        query = f"""SELECT
+        cr.id as roi_id
+        FROM cell_rois cr 
+        JOIN ophys_experiments oe ON oe.id = cr.ophys_experiment_id
+        WHERE oe.id = '{exp_id}'"""
+        rois = pd.read_sql(query, self.lims_db.get_connection()).values
+        return len(rois)
