@@ -27,8 +27,6 @@ from meso_tools.io_utils import read_tiff, write_tiff
 from meso_tools.image_tools import image_negative_rescale, image_downsample
 import numpy as np
 
-GAP = 24
-
 def read_full_field_meta(metadata):
     """
     reading of the relevant metadata fields
@@ -88,14 +86,20 @@ def check_tiff(tiff_array, meta_dict):
     num_slices = meta_dict['num_slices']
     num_repeats = meta_dict['num_volumes']
     # calculate what tiff shape should be:
-    pix_res = rois[0]['scanfields']['pixelResolutionXY']
-    output_tiff_shape =  [pix_res[0]*len(rois), pix_res[1]]
-    expected_tiff_shape = [num_slices*num_repeats, pix_res[1]*len(rois)+(GAP*(len(rois)-1)), pix_res[0]]
+    
+    pix_res_x = rois[0]['scanfields']['pixelResolutionXY'][0]
+    pix_res_y = rois[0]['scanfields']['pixelResolutionXY'][1]
+
+    output_tiff_shape =  [pix_res_x*len(rois), pix_res_y]
+    raw_len = tiff_array.shape[1]
+    rois_num = rois_num = len(ff_meta_dict['rois'])
+    gap = (raw_len - pix_res_y*rois_num)/(rois_num-1)
+    expected_tiff_shape = [num_slices*num_repeats, pix_res_y*len(rois)+(gap*(len(rois)-1)), pix_res_x]
     tiff_shape = np.shape(tiff_array)
 
     assert expected_tiff_shape == list(tiff_shape), f"Input tiff shape is unexpected"
 
-    return output_tiff_shape
+    return output_tiff_shape, int(gap)
 
 def average_tiff(tiff_array, meta):
     """
@@ -116,7 +120,7 @@ def average_tiff(tiff_array, meta):
         averaged_tiff = y
     return averaged_tiff
 
-def stitch_tiff(averaged_tiff, meta_dict, output_tiff_shape):
+def stitch_tiff(averaged_tiff, meta_dict, gap, output_tiff_shape):
     """
     actually stitch the file into a full FOV image
     returns: stitched image, 2D mumpy array
@@ -163,8 +167,8 @@ def stitch_tiff(averaged_tiff, meta_dict, output_tiff_shape):
     roi_sizes *= np.array([pix_to_deg_x, pix_to_deg_y])
     roi_sizes = roi_sizes.astype(int)
 
-    cut_top_right = np.array([[i*(roi_sizes[i][1] + GAP), 0] for i, roi in enumerate(rois)])
-    cut_bottom_left = np.array([[(i+1)*(roi_sizes[i][1]) + i*GAP, roi_sizes[i][0]] for i, roi in enumerate(rois)])
+    cut_top_right = np.array([[i*(roi_sizes[i][1] + gap), 0] for i, roi in enumerate(rois)])
+    cut_bottom_left = np.array([[(i+1)*(roi_sizes[i][1]) + i*gap, roi_sizes[i][0]] for i, roi in enumerate(rois)])
 
     for i, _ in enumerate(rois):
         averaged_tiff = image_negative_rescale(averaged_tiff)
@@ -249,8 +253,6 @@ def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
 
 
 if __name__ == "__main__":
-
-    GAP = 24
 
     path_to_tiff = "/Users/nataliaorlova/Code/data/incoming/1180346813_fullfield.tiff"
 
