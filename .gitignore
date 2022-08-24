@@ -6,3 +6,4 @@ build
 venv
 .ipynb_checkpoints
 *checkpoint.ipynb
+.ipynb
