@@ -193,3 +193,11 @@ class LimsApi():
         WHERE oe.id = '{exp_id}'"""
         rois = pd.read_sql(query, self.lims_db.get_connection()).values
         return len(rois)
+
+    def get_experiment_depth(self, exp_id):
+        query = f"""SELECT
+                    oe.calculated_depth as depth
+                    FROM ophys_experiments oe 
+                    WHERE oe.id = '{exp_id}'"""
+        depth = pd.read_sql(query, self.lims_db.get_connection()).values[0][0]
+        return depth
