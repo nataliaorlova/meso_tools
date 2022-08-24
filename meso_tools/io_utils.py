@@ -201,3 +201,13 @@ class LimsApi():
                     WHERE oe.id = '{exp_id}'"""
         depth = pd.read_sql(query, self.lims_db.get_connection()).values[0][0]
         return depth
+
+    def get_experiment_line(exp_id):
+        query = f"""SELECT
+                    sp.name as name
+                    FROM ophys_experiments oe 
+                    JOIN ophys_sessions os ON oe.ophys_session_id = os.id
+                    JOIN specimens sp ON sp.id = os.specimen_id
+                    WHERE oe.id = '{exp_id}'"""
+        line = pd.read_sql(query, lapi.lims_db.get_connection()).values[0][0]
+        return line
