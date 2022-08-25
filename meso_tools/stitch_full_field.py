@@ -92,7 +92,7 @@ def check_tiff(tiff_array, meta_dict):
 
     output_tiff_shape =  [pix_res_x*len(rois), pix_res_y]
     raw_len = tiff_array.shape[1]
-    rois_num = rois_num = len(ff_meta_dict['rois'])
+    rois_num = rois_num = len(meta_dict['rois'])
     gap = (raw_len - pix_res_y*rois_num)/(rois_num-1)
     expected_tiff_shape = [num_slices*num_repeats, pix_res_y*len(rois)+(gap*(len(rois)-1)), pix_res_x]
     tiff_shape = np.shape(tiff_array)
