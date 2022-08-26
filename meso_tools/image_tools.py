@@ -199,8 +199,8 @@ def compute_contrast(image, percentile_max=95, percentile_min=5, stack = False):
         Acutance of the image.
     """
     if stack:
-        Imax = np.percentile(img, percentile_max, axis=2)
-        Imin = np.percentile(img, percentile_min, axis=2)
+        Imax = np.percentile(image, percentile_max, axis=2)
+        Imin = np.percentile(image, percentile_min, axis=2)
         c = (Imax-Imin)/(Imax+Imin)
     else:
         Imax = np.percentile(image, percentile_max)

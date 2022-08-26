@@ -120,6 +120,29 @@ def average_tiff(tiff_array, meta):
         averaged_tiff = y
     return averaged_tiff
 
+def average_stack(tiff_array, meta, average_slices = True, average_repeats = True):
+    """
+    average input tiff over all slices and number of stack repeats
+    return : a single page tiff (2D np.array)
+    """
+    slices = meta['num_slices'] # number of z slices
+    repeats = meta['num_volumes'] # number fo repeats
+    
+    x = tiff_array.reshape(tiff_array.shape[0] // repeats, repeats, tiff_array.shape[1], tiff_array.shape[2]) 
+    
+    if average_repeats :
+        y = x.mean(axis = 1)
+        
+    
+    if average_slices: 
+        y = x.mean(axis = 0)
+    
+    if average_slices & average_repeats:
+        a = x.mean(axis = 1) 
+        y = a.mean(axis = 0)
+        
+    return y
+
 def stitch_tiff(averaged_tiff, meta_dict, gap, output_tiff_shape):
     """
     actually stitch the file into a full FOV image
@@ -165,6 +188,7 @@ def stitch_tiff(averaged_tiff, meta_dict, gap, output_tiff_shape):
 
     # convert sizes to pixels:
     roi_sizes *= np.array([pix_to_deg_x, pix_to_deg_y])
+    roi_sizes= roi_sizes.round(0)
     roi_sizes = roi_sizes.astype(int)
 
     cut_top_right = np.array([[i*(roi_sizes[i][1] + gap), 0] for i, roi in enumerate(rois)])
