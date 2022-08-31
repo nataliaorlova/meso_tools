@@ -7,7 +7,8 @@ import pandas as pd
 from allensdk.internal.api import PostgresQueryMixin
 
 def read_tiff(path_to_tiff, page_num=None):
-    """ reads either entire tiff file, or if page_num is given, only those pages are returned
+    """ 
+    Reads either entire tiff file, or if page_num is given, only those pages are returned
         path_to_tiff: str: local path to the tifffile
         page_num : int or list of 2 ints: number of pages to read, 
         if none provided will atempt to read entire tiff file. 
@@ -130,13 +131,31 @@ class LimsApi():
         return table_columns.columns.values
 
     def get_all_distinct_values_in_column(self, table, column):
-        """get all distinct values in column/table
+        """
+        Get all distinct values in column/table
+        Parameters
+        table : string
+            name of lims table
+        column :  string
+            name of column in table
+        -------
+        Returns
+        columns: : list [string, string, string]
+            list of column names
+        -------
         """
         query = (f"""SELECT {column} FROM {table} GROUP BY {column} """)
-        return pd.read_sql(query, self.lims_db.get_connection())
+        df = pd.read_sql(query, self.lims_db.get_connection())
+        columns= list(df.values)
+        return columns
 
     def get_experiments_in_project(self, project):
-        """get alal epxeriments, their deths and specimen name for given project code
+        """
+        Get all experiments, their deths and specimen name for given project code
+        Parameters
+        ----------
+        Returns
+        -------
         """
         query = f"""SELECT 
         oe.id AS exp_id,
@@ -154,6 +173,12 @@ class LimsApi():
         return pd.read_sql(query, self.lims_db.get_connection())
 
     def get_all_lims_tables(self):
+        """
+        Parameters
+        ----------
+        Returns
+        -------
+        """
         query = """SELECT table_name
                 FROM information_schema.tables
                 WHERE table_schema='public'
@@ -171,7 +196,7 @@ class LimsApi():
         Returns
         -------
         dataframe : pd.dataframe
-            pandas dataframe w columns [mouse_id, session_id, experiment_id, container_id]
+            pandas dataframe woth columns [mouse_id, session_id, experiment_id, container_id]
         """
         query = f"""SELECT
             sp.external_specimen_name as mouse_id,
@@ -186,6 +211,12 @@ class LimsApi():
         return pd.read_sql(query, self.lims_db.get_connection())  
 
     def get_ROI_number_per_experiment(self, exp_id):
+        """
+        Parameters
+        ----------
+        Returns
+        -------
+        """
         query = f"""SELECT
         cr.id as roi_id
         FROM cell_rois cr 
@@ -195,6 +226,12 @@ class LimsApi():
         return len(rois)
 
     def get_experiment_depth(self, exp_id):
+        """
+        Parameters
+        ----------
+        Returns
+        -------
+        """
         query = f"""SELECT
                     oe.calculated_depth as depth
                     FROM ophys_experiments oe 
@@ -202,12 +239,27 @@ class LimsApi():
         depth = pd.read_sql(query, self.lims_db.get_connection()).values[0][0]
         return depth
 
-    def get_experiment_line(exp_id):
+    def get_experiment_line(self, exp_id):
+        """
+        Get Cre line for given experiment id
+        Parameters
+        ----------
+        exp_id : int
+            experiment ID assigned in LIMS
+        Returns
+        -------
+        cre : str
+            Cre line
+        mouse_id : int
+            Mouse ID assigned in LIMS 
+        """
         query = f"""SELECT
                     sp.name as name
                     FROM ophys_experiments oe 
                     JOIN ophys_sessions os ON oe.ophys_session_id = os.id
                     JOIN specimens sp ON sp.id = os.specimen_id
                     WHERE oe.id = '{exp_id}'"""
-        line = pd.read_sql(query, lapi.lims_db.get_connection()).values[0][0]
-        return line
+        line = pd.read_sql(query, self.lims_db.get_connection()).values[0][0]
+        cre = line.split('-')[0]
+        mouse_id = line.split('-')[-1]
+        return cre, mouse_id
