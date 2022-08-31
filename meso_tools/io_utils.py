@@ -7,7 +7,7 @@ import pandas as pd
 from allensdk.internal.api import PostgresQueryMixin
 
 def read_tiff(path_to_tiff, page_num=None):
-    """ reads either entire tiff file, or if n is given, N pages of it
+    """ reads either entire tiff file, or if page_num is given, only those pages are returned
         path_to_tiff: str: local path to the tifffile
         page_num : int or list of 2 ints: number of pages to read, 
         if none provided will atempt to read entire tiff file. 
@@ -26,7 +26,7 @@ def read_tiff(path_to_tiff, page_num=None):
         else: # number of pages is not provided: 
             if len(tiff.pages) >=5000:
                 print(f"This timeseries has more than 5000 frames to not overload RAM, we will only read 5000 first pages.")
-                print(f"To read more pages,in case large amount of RAM is available, provide number of pages to read by calling read_tiff(path_to_tiff, page_num=value)")
+                print(f"To read more pages, in case large amount of RAM is available, provide number of pages to read by calling read_tiff(path_to_tiff, page_num=value)")
                 page_num = 5000
                 tiff_array = tiff.asarray(range(0, page_num))
             else:
