@@ -250,16 +250,21 @@ class LimsApi():
         """
         query = (f"""SELECT {column} FROM {table} GROUP BY {column} """)
         df = pd.read_sql(query, self.lims_db.get_connection())
+
         columns= list(df.values)
         return columns
 
-    def get_experiments_in_project(self, project):
+    def get_experiments_in_project(self, project : str) -> pd.DataFrame:
         """
-        Get all experiments, their deths and specimen name for given project code via a direct query to LIMS
+       Get all experiments, their deths and specimen name for given project code via a direct query to LIMS
         Parameters
         ----------
+        project : str
+            Project code from LIMS
         Returns
         -------
+        pd.DataFrame
+            dataframe with following columns : exp_id, session_id, container_id, depth, specimen
         """
         query = f"""SELECT 
                     oe.id AS exp_id,
@@ -277,21 +282,22 @@ class LimsApi():
         df = pd.read_sql(query, self.lims_db.get_connection())
         return df
 
-    def get_all_lims_tables(self):
+    def get_all_lims_tables(self) -> list:
         """
-        Parameters
-        ----------
+        Get all tables of LIMS
         Returns
         -------
+        list:
+            List of tables
         """
         query = """SELECT table_name
                     FROM information_schema.tables
                     WHERE table_schema='public'
                     AND table_type='BASE TABLE';"""
-        tables = pd.read_sql(query, self.lims_db.get_connection()).table_name.values
+        tables = list(pd.read_sql(query, self.lims_db.get_connection()).table_name.values)
         return tables   
 
-    def get_sessions_per_mouse_id(self, mouse_id):
+    def get_sessions_per_mouse_id(self, mouse_id : int) -> pd.DataFrame:
         """
         Get all sessions and experiments per given mouse_id via a direct query to LIMS
         Parameters
@@ -315,7 +321,7 @@ class LimsApi():
                     WHERE sp.external_specimen_name = '{mouse_id}' AND oe.workflow_state = 'passed' """
         return pd.read_sql(query, self.lims_db.get_connection())  
 
-    def get_ROI_number_per_experiment(self, exp_id):
+    def get_ROI_number_per_experiment(self, exp_id : int) -> int:
         """
         Get number of segmenter ROIs given experiment ID via a direct query to LIMS
         Parameters
@@ -336,7 +342,7 @@ class LimsApi():
         num_rois = len(rois)
         return num_rois
 
-    def get_experiment_depth(self, exp_id):
+    def get_experiment_depth(self, exp_id : str) -> int:
         """
         Get imaging depth for given exeriment ID via a direct query to LIMS
         Parameters
@@ -355,7 +361,7 @@ class LimsApi():
         depth = pd.read_sql(query, self.lims_db.get_connection()).values[0][0]
         return depth
 
-    def get_experiment_line(self, exp_id):
+    def get_experiment_line(self, exp_id : int) -> tuple(str, str):
         """
         Get Cre line for given experiment ID via a direct query to LIMS
         Parameters
@@ -364,10 +370,11 @@ class LimsApi():
             experiment ID assigned in LIMS
         Returns
         -------
-        cre : str
-            Cre line
-        mouse_id : int
-            Mouse ID assigned in LIMS 
+        tuple(str, str):
+            cre : str
+                Cre line
+            mouse_id : int
+                Mouse ID assigned in LIMS 
         """
         query = f"""SELECT
                     sp.name as name
