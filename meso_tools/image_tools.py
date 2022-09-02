@@ -342,17 +342,22 @@ def compute_acutance(image: np.ndarray, stack : bool = False) -> float:
     
     return accutance
 
-def compute_basic_snr(image: np.ndarray, stack=False):
-    """Compute basic SNR of an image as defined by standard deviation / mean of the image
+def compute_basic_snr(image: np.ndarray, stack : bool = False) -> float:
+    """
+    Compute basic SNR of an image as defined by standard deviation / mean of the image
+
     Parameters
     ----------
-    image : numpy.ndarray, (N, M)
-        Image to compute SNR of.
+    image : np.ndarray
+        Image to compute Basic SNR of.
+    stack : bool, optional
+        Whether input is a stack (tiemseries, 3D array), or a single image (2D array), by default False
+
     Returns
     -------
-    basic_snr : float
+    float
         Basic SNR of an image.
-    """
+    """    
     if stack: 
         basic_snr = np.std(image, axis=(2,3))/np.mean(image, axis=(2,3))
         return list(basic_snr.flatten())
@@ -360,18 +365,21 @@ def compute_basic_snr(image: np.ndarray, stack=False):
         basic_snr = np.std(image)/np.mean(image)
         return basic_snr
 
-def compute_photon_flux(image: np.ndarray, stack=False):
-    """Compute photon flux a 2P image as defined by sqrt(mean pixel valu in image)
+def compute_photon_flux(image: np.ndarray, stack : bool = False) -> float:
+    """
+    Compute photon flux a 2P image as defined by sqrt(mean pixel valu in image)
+
     Parameters
     ----------
-    image : numpy.ndarray, (N, M)
+    image : np.ndarray
         Image to compute phootn flux of.
-    stack : bool, 
-        Falg of whether input is a stakc of images (2D array) or a single image (2D array) 
+    stack : bool, optional
+        Whether input is a stack (tiemseries, 3D array), or a single image (2D array), by default False
+
     Returns
     -------
-    photon_flux : float
-        photon flux of an image.
+    float
+        Photon flux of an image.
     """
     if stack:
         photon_flux = np.sqrt(np.mean(image, axis=(2,3)))
@@ -380,30 +388,31 @@ def compute_photon_flux(image: np.ndarray, stack=False):
         photon_flux = np.sqrt(np.mean(image.flatten()))
         return photon_flux
 
-def compute_block_snr(img, block_shape, blocks_to_agg, return_block, snr_metric = "basic"):
-    """Compute the SNR of nonoverlapping blocks of an image, return aggregate
+def compute_block_snr(image : np.ndarray, block_shape : tuple, blocks_to_agg : tuple, return_block : bool = False, snr_metric : str = "basic") -> Union[float, tuple]:
+    """
+    Compute the SNR of nonoverlapping blocks of an image, return aggregate
     SNR from certrain blocks.
-    
+
     Parameters
     ----------
-    img : np.ndarray
+    image : np.ndarray
         Image to compute SNR of.
-    block_shape : tuple(int,int)
+    block_shape : tuple
         Shape of blocks to compute SNR of.
-    snr_metric : str
-        Type of SNR metric to compute, for now has to be one from thsi list ["basic", "acutance", "photon_flux"]
-    blocks_to_agg : tuple(int,int)
+    blocks_to_agg : tuple
         Start and end index of block to aggregate SNR (e.g (6,10) will aggregate
         the middle 5 blocks if 16 is chosen).
-    return_block : bool
-        If True, return the blocks used to compute SNR.
+    return_block : bool, optional
+        If True, return the blocks used to compute SNR., by default False
+    snr_metric : str, optional
+        Type of SNR metric to compute, for now has to be one from thsi list ["basic", "acutance", "photon_flux"], by default "basic"
 
     Returns
     -------
-    mean_block_snr : float
+    Union[float, tuple]
         Mean SNR of blocks.
-    """
-    view = view_as_blocks(img, block_shape=block_shape)
+    """    
+    view = view_as_blocks(image, block_shape=block_shape)
 
     # calculate basic SNR. TODO: add more metrics
     if snr_metric == "basic":
