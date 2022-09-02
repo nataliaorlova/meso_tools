@@ -1,6 +1,8 @@
 ## this file definse functions to manipulate pixel data:
 ### plot histograms, adjsut contrast, measure SNR, etc
 
+from typing import Tuple, Union, Any
+import glob
 import numpy as np
 import scipy.stats
 import matplotlib.pyplot as plt
@@ -9,10 +11,6 @@ from skimage import io
 from skimage.transform import resize
 from skimage.util import view_as_blocks
 import tifffile as tiff
-import glob
-import seaborn as sns
-
-sns.colors
 
 CMAPS = ['Accent', 'Accent_r', 'Blues', 'Blues_r', 'BrBG', 'BrBG_r', 'BuGn', 'BuGn_r', 'BuPu', 'BuPu_r',
                  'CMRmap', 'CMRmap_r', 'Dark2', 'Dark2_r', 'GnBu', 'GnBu_r', 'Greens', 'Greens_r', 'Greys',
@@ -35,21 +33,45 @@ CMAPS = ['Accent', 'Accent_r', 'Blues', 'Blues_r', 'BrBG', 'BrBG_r', 'BuGn', 'Bu
                  'terrain_r', 'twilight', 'twilight_r', 'twilight_shifted', 'twilight_shifted_r', 'viridis',
                  'viridis_r', 'winter', 'winter_r']
 
-def get_pixel_hist2d(x : np.Array, y : np.Aarray, xlabel=None, ylabel=None):
-    fig = plt.figure(figsize=(10,10))
-    H, xedges, yedges = np.histogram2d(x, y, bins=(30, 30))
-    H = H.T
-    plt.imshow(H, interpolation='nearest', origin='low',
+
+def get_pixel_hist2d(vector_1 : np.Array, vector_2 : np.Array, bins : int, fig_size : int, xlabel : Union[str, None]=None, ylabel : Union[str, None]=None) -> Tuple[plt.Figure, float, float, float]:
+    """
+    Plot 2D histogram of two vectors
+
+    Parameters
+    ----------
+    v1 : np.Array
+        data vector 1 
+    v2 : np.Array
+        data vector 2
+    bins : int
+        bins to use for histogram
+    fig_size : int
+        figure size,  inches
+    xlabel : Union[str, None], optional
+        x axis label, by default None
+    ylabel : Union[str, None], optional
+        y axis label, by default None
+
+    Returns
+    -------
+    Tuple[plt.Figure, float, float, float]
+        Figure handles, slope, offset and r value of a linear fit into the data
+    """
+    fig = plt.figure(figsize = (fig_size,fig_size))
+    hist, xedges, yedges = np.histogram2d(vector_1, vector_2, bins)
+    hist = hist.T
+    plt.imshow(hist, interpolation='nearest', origin='lower',
               extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]], aspect='auto', norm=LogNorm())
     plt.colorbar()
 
-    slope, offset, r_value, p_value, std_err = scipy.stats.linregress(x, y)
+    slope, offset, r_value, _, _ = scipy.stats.linregress(vector_1, vector_2)
     fit_fn = np.poly1d([slope, offset])
 
-    plt.plot(x, fit_fn(x), '--k')
+    plt.plot(vector_1, fit_fn(vector_1), '--k')
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.title('%s    R2=%.2f'%(fit_fn, r_value**2))
+    plt.title(f"{fit_fn}, R2={np.around(r_value**2, decimals=2)}")
     return fig, slope, offset, r_value
 
 def im_plot(path):
