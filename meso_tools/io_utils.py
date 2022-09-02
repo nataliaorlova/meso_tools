@@ -25,7 +25,7 @@ def read_tiff(path_to_tiff : str, page_num : int = None) -> np.Array:
         numpy array representing timeseries that was read
     """
     with tifffile.TiffFile(path_to_tiff, mode ='rb') as tiff:
-        if page_num: 
+        if page_num:
             if isinstance(page_num, list):
                 #read pages from range
                 tiff_array = tiff.asarray(range(page_num[0], page_num[1]))
@@ -55,7 +55,6 @@ def write_tiff(path_to_tiff : str, data : np.Array) -> None:
         None
     """
     tifffile.imsave(path_to_tiff, data)
-    return
 
 def read_h5(path_to_h5 : str, field : str) -> Any:
     """
@@ -91,7 +90,6 @@ def write_h5(path : str, h5_data : Any) -> None:
     """
     with h5py.File(path, 'w') as h5_file:
         h5_file.create_dataset('data', data=h5_data)
-    return
 
 def read_si_metadata(path_to_tiff : str) -> dict:
     """
@@ -256,7 +254,7 @@ class LimsApi():
 
     def get_experiments_in_project(self, project : str) -> pd.DataFrame:
         """
-       Get all experiments, their deths and specimen name for given project code via a direct query to LIMS
+        Get all experiments, their deths and specimen name for given project code via a direct query to LIMS
         Parameters
         ----------
         project : str

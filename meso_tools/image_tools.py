@@ -10,6 +10,9 @@ from skimage.transform import resize
 from skimage.util import view_as_blocks
 import tifffile as tiff
 import glob
+import seaborn as sns
+
+sns.colors
 
 CMAPS = ['Accent', 'Accent_r', 'Blues', 'Blues_r', 'BrBG', 'BrBG_r', 'BuGn', 'BuGn_r', 'BuPu', 'BuPu_r',
                  'CMRmap', 'CMRmap_r', 'Dark2', 'Dark2_r', 'GnBu', 'GnBu_r', 'Greens', 'Greens_r', 'Greys',
@@ -32,7 +35,7 @@ CMAPS = ['Accent', 'Accent_r', 'Blues', 'Blues_r', 'BrBG', 'BrBG_r', 'BuGn', 'Bu
                  'terrain_r', 'twilight', 'twilight_r', 'twilight_shifted', 'twilight_shifted_r', 'viridis',
                  'viridis_r', 'winter', 'winter_r']
 
-def get_pixel_hist2d(x, y, xlabel=None, ylabel=None):
+def get_pixel_hist2d(x : np.Array, y : np.Aarray, xlabel=None, ylabel=None):
     fig = plt.figure(figsize=(10,10))
     H, xedges, yedges = np.histogram2d(x, y, bins=(30, 30))
     H = H.T
@@ -232,7 +235,7 @@ def compute_acutance(image: np.ndarray, stack = False) -> float:
                 accutance.append(a)
     else:
         grady, gradx = np.gradient(image)
-        accutance = (grady ** 2 + gradx ** 2).mean()
+        accutance = (grady ** 2 + gradx ** 2).mean() #TODO Normalize by mean
     
     return accutance
 
