@@ -338,7 +338,7 @@ def compute_acutance(image: np.ndarray, stack : bool = False) -> float:
                 accutance.append(a)
     else:
         grady, gradx = np.gradient(image)
-        accutance = (grady ** 2 + gradx ** 2).mean() #TODO Normalize by mean
+        accutance = (grady ** 2 + gradx ** 2).mean() #to-do: Normalize by mean
     
     return accutance
 
