@@ -59,9 +59,11 @@ class NAStool():
         """Depending on which NAS host has been logged in, 
         will return the list of known folders which contain backup data
 
-        Returns:
-            list: filepaths to backup data which can be input to NAStool functions
-        """  
+        Returns
+        -------
+        list
+            filepaths to backup data which can be input to NAStool functions
+        """        
 
         #get folders within host
 
@@ -78,12 +80,16 @@ class NAStool():
     def nas_query(self, folder: str) -> dict:
         """Input the NAS folder to walk through, and return dictionary of all folders in that directory.
 
-        Args:
-            folder (str): NAS folder path that data is backed up in.
-        Returns:
-            dict: filepaths to backup data which can be input to NAStool functions
-        """    
+        Parameters
+        ----------
+        folder : str
+            NAS folder path that data is backed up in
 
+        Returns
+        -------
+        dict
+            Filepaths to backup data which can be input to NAStool functions
+        """        
 
         response = requests.get("http://"+str(self.ip)+"/webapi/entry.cgi?api=SYNO.FileStation.List&version=2&method=list&additional=%5B%22real_path%22%2C%22size%2Cperm%22%5D&folder_path=%22%2F"+
         folder+
@@ -95,14 +101,20 @@ class NAStool():
         """Compares the output of a requests query against a list of released sessions, 
         and returns the filepath for each session in the NAS storage that matches the ID of a released session
 
-        Args:
-            release_list (str): Relative string filepath to a .csv file containing information about released ophys sessions. 
+        Parameters
+        ----------
+        release_list : str
+             Relative string filepath to a .csv file containing information about released ophys sessions. 
             This data is the result of an AllenSDK query and not currently included in this code
-            query_response (dict): Response from the NAS storage containing list of folders and filepaths.  
+        query_response : dict
+            Response from the NAS storage containing list of folders and filepaths.  
             This data is the output of the nas_query function
-        Returns:
-            list: NAS filepaths to each folder with a name matching a session ID in the release list
-        """    
+
+        Returns
+        -------
+        list
+            NAS filepaths to each folder with a name matching a session ID in the release list
+        """         
 
         df = pd.read_csv(release_list)
         sessions = df['ophys_session_id'].astype(str).to_list()
@@ -113,9 +125,15 @@ class NAStool():
         self.released_backups = released_backups
         return released_backups
 
-    def nas_delete(self, delete_list = None):
+    def nas_delete(self, delete_list: list = None):
         """Deletes NAS folders from a list of filepaths
-        """   
+
+        Parameters
+        ----------
+        delete_list : list, optional
+            List of NAS filepaths to delete, by default will use the released_backups calculated in the release check function
+        """        
+   
         if delete_list == None:
             delete_list = self.released_backups  
         task_dict = {}
@@ -139,9 +157,12 @@ class NAStool():
     def nas_status(self) -> list:
         """Check status of current deletion job
 
-        Returns:
-            list: returns list of dictionaries containig the response of the deletion status query
+        Returns
+        -------
+        list
+            returns list of dictionaries containig the response of the deletion status query
         """        
+      
         task_dict = self.task_ids
         response_list = []
         for key in task_dict: 
