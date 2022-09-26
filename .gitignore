@@ -7,3 +7,4 @@ venv
 .ipynb_checkpoints
 *checkpoint.ipynb
 .ipynb
+.vscode/settings.json
