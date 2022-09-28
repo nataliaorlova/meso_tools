@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 from allensdk.internal.api import PostgresQueryMixin
 
-def read_tiff(path_to_tiff : str, page_num : int = None) -> np.Array:
+def read_tiff(path_to_tiff : str, page_num : int = None) -> np.array:
     """
     Reads either entire tiff file, or if page_num is given, only those pages or pages range
     Parameters
@@ -41,7 +41,7 @@ def read_tiff(path_to_tiff : str, page_num : int = None) -> np.Array:
                 tiff_array = tiff.asarray()
     return tiff_array
 
-def write_tiff(path_to_tiff : str, data : np.Array) -> None:
+def write_tiff(path_to_tiff : str, data : np.array) -> None:
     """
     Writes tif file to disk
     Parameters
@@ -122,7 +122,7 @@ def get_roi_data(path_to_tiff : str) -> dict:
     meta_data = tifffile.read_scanimage_metadata(open(path_to_tiff, 'rb'))
     return meta_data[1]
 
-def load_motion_corrected_movie(filepath : str, page_num : int =None) -> np.Array:
+def load_motion_corrected_movie(filepath : str, page_num : int =None) -> np.array:
     """
     Load motion corrected movie as numpy array; whole or some pages
     Parameters
@@ -359,7 +359,7 @@ class LimsApi():
         depth = pd.read_sql(query, self.lims_db.get_connection()).values[0][0]
         return depth
 
-    def get_experiment_line(self, exp_id : int) -> tuple(str, str):
+    def get_experiment_line(self, exp_id : int) -> tuple:
         """
         Get Cre line for given experiment ID via a direct query to LIMS
         Parameters
@@ -383,4 +383,4 @@ class LimsApi():
         line = pd.read_sql(query, self.lims_db.get_connection()).values[0][0]
         cre = line.split('-')[0]
         mouse_id = line.split('-')[-1]
-        return cre, mouse_id
+        return (cre, mouse_id)
