@@ -22,7 +22,6 @@
 #       figure out insert coordinates
 #           normalization w regards to full field is problematic 
 
-from matplotlib import path
 from meso_tools.io_utils import read_si_metadata as get_meta
 from meso_tools.io_utils import read_tiff, write_tiff
 from meso_tools.image_tools import image_negative_rescale, image_downsample
