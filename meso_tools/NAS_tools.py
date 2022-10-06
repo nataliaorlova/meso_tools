@@ -1,13 +1,17 @@
-"""Tool currently returns list of session filepaths in storage that are candidates for deletion
-Currently only published/passed sessions.  Should update to include failed and incomplete sessions
-that are associated with "published" mouse_ids"""
+# Sam Seid | September 2022
+
+# Tool currently returns list of session filepaths in storage that are 
+# candidates for deletion. 
+# Currently only published/passed sessions.  
+# Should update to include failed and incomplete sessions
+# that are associated with "published" mouse_ids"""
 
 import requests
 
 class NASapi():
     """NAStool interacts with the NAS storage device using http requests on the Synology API.
     Use functions built into this class to login, query the database, and perform operations
-    such as deleting a list of folder paths
+    such as deleting data folders
     """
     def __init__(self, nas_credentials: str):
         """Takes txt doc containing NAS credentials, saves them, and logs into the NAS.
@@ -115,7 +119,8 @@ class NASapi():
 
 
     def release_check(self, sessions: list, query_response: dict) -> list:
-        """Compares the output of a requests query against a list of released sessions,
+        """
+        Compares the output of a requests query against a list of released sessions,
         and returns the filepath for each session in the NAS storage that matches
         the ID of a released session
 

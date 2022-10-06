@@ -4,7 +4,8 @@
 #   b) only channel 1 saving is enabled
 #   c) all rois are in non-discrete plane mode
 #   d) all rois have only one scanfield
-#   d) all rois are of the same pixel size and degree size (scaling would be too much work, plus we don't want to create a mess with resolution)
+#   d) all rois are of the same pixel size and degree size (scaling would be too much work, 
+#      plus we don't want to create a mess with resolution)
 # 2. Get all above values for the stack (num of planes, etc)
 # 3. Asses that tiff size is correct
 # 4. If multiple repeats of the stack (volumes) - average them out before stitching
@@ -14,14 +15,13 @@
 #           For each roi in rois:
 #               Get roi’s pixel size, and location
 #               Get portion of the tiff to insert, inset to location in destination file
-# 8. split and avergae surface images 
+# 8. split and avergae surface images
 # 9. insert surface averages into stitched tiff
 #       downsample to match full field file resolution
 
 #       figure out insert coordinates
 #           normalization w regards to full field is problematic 
 
-from matplotlib import path
 from meso_tools.io_utils import read_si_metadata as get_meta
 from meso_tools.io_utils import read_tiff, write_tiff
 from meso_tools.image_tools import image_negative_rescale, image_downsample
