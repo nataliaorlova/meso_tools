@@ -6,5 +6,5 @@ build
 venv
 .ipynb_checkpoints
 *checkpoint.ipynb
-.ipynb
+*.ipynb
 .vscode/settings.json
