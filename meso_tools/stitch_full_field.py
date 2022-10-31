@@ -22,10 +22,11 @@
 #       figure out insert coordinates
 #           normalization w regards to full field is problematic 
 
+import numpy as np
 from meso_tools.io_utils import read_si_metadata as get_meta
 from meso_tools.io_utils import read_tiff, write_tiff
 from meso_tools.image_tools import image_negative_rescale, image_downsample
-import numpy as np
+
 
 def read_full_field_meta(metadata):
     """
@@ -133,7 +134,6 @@ def average_stack(tiff_array, meta, average_slices = True, average_repeats = Tru
     if average_repeats :
         y = x.mean(axis = 1)
         
-    
     if average_slices: 
         y = x.mean(axis = 0)
     
@@ -275,7 +275,6 @@ def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
 
     return ff_stitched_tiff
 
-
 if __name__ == "__main__":
 
     path_to_tiff = "/Users/nataliaorlova/Code/data/incoming/1180346813_fullfield.tiff"
@@ -290,17 +289,15 @@ if __name__ == "__main__":
 
     check_tiff(tiff_array, ff_meta_dict)
 
-    output_tiff_shape = check_tiff(tiff_array, ff_meta_dict)
+    output_tiff_shape, gap = check_tiff(tiff_array, ff_meta_dict)
 
     ff_averaged_tiff = average_tiff(tiff_array, ff_meta_dict)
 
-    ff_stitched_tiff, ff_meta_dict = stitch_tiff(ff_averaged_tiff, ff_meta_dict, output_tiff_shape)
+    ff_stitched_tiff, ff_meta_dict = stitch_tiff(ff_averaged_tiff, ff_meta_dict, gap, output_tiff_shape)
     surface_path = "/Users/nataliaorlova/Code/data/incoming/1180346813_averaged_surface.tiff"
 
     split_surface_meta, surface_averaged = split_surface(surface_path)
 
     write_path = "/Users/nataliaorlova/Code/data/incoming/1180346813_fullfield_stitched.tiff"
+    
     write_tiff(write_path, ff_stitched_tiff)
-
-# ToDo
-# how to pass the filepath to this file without using argparser?

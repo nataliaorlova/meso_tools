@@ -41,6 +41,7 @@ def read_tiff(path_to_tiff : str, page_num : int = None) -> np.array:
                 tiff_array = tiff.asarray()
     return tiff_array
 
+
 def write_tiff(path_to_tiff : str, data : np.array) -> None:
     """
     Writes tif file to disk
@@ -145,6 +146,62 @@ def load_motion_corrected_movie(filepath : str, page_num : int =None) -> np.arra
         else: 
             motion_corrected_movie = motion_corrected_movie_file['data'][page_num:]
     return motion_corrected_movie
+
+def read_scanimage_stack_metadata(metadata):
+    """
+    reading of the relevant metadata fields
+    return: dict
+    """
+    md_general = metadata[0]
+    stack_metadata = {}
+    # stack params
+    stack_metadata['num_slices'] = md_general['SI.hStackManager.actualNumSlices']
+    stack_metadata['num_volumes'] = md_general['SI.hStackManager.actualNumVolumes']
+    stack_metadata['z_step'] = md_general['SI.hStackManager.actualStackZStepSize']
+    stack_metadata['all_zs'] = np.asarray(md_general['SI.hStackManager.zsAllActuators'])[:,1]
+    stack_metadata['frames_per_slice'] = md_general['SI.hStackManager.framesPerSlice']
+    #flag properties:
+    stack_metadata['channel_save'] = md_general['SI.hChannels.channelSave']
+    stack_metadata['stack_type'] = md_general['SI.hStackManager.stackDefinition']
+
+    return stack_metadata
+
+def read_scanimage_stack(tiff_path : str, stack_meta : dict, slices : int = None, volumes : int = None) -> np.array:
+    """
+    read_scanimage_stack reads ScanImage stack from file
+    Parameters
+    ----------
+    tiff_path : str
+        paht to tiff file w stack
+    stack_meta : dict
+        disctionary wiht stack parameters
+    slices : int, optional
+        slices(planes) to read, if None - read all, by default None
+    volumes : int, optional
+        volumes (repeats of the stack) to read, if None - read all, by default None
+
+    Returns
+    -------
+    np.array
+        stack read as numpy array
+    """
+    total_slices = stack_meta['num_slices']
+    total_volumes = stack_meta['num_volumes']
+    
+    if not slices:
+        slices = total_slices
+        
+    if not volumes:
+        volumes = total_volumes
+        
+    frames_to_read = []
+    for repeat in range(volumes):
+        frames_to_read += list(np.linspace(repeat*total_slices,repeat*total_slices+slices,slices))
+
+    with tifffile.TiffFile(tiff_path, mode ='rb') as tiff:
+        stack = tiff.asarray(frames_to_read)
+    
+    return stack
 
 class LimsApi():
     """
