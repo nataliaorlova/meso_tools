@@ -4,6 +4,8 @@ from . io_utils import read_h5 as read_h5
 from . io_utils import write_h5 as write_h5
 from . io_utils import LimsApi as LimsApi
 from . io_utils import load_motion_corrected_movie as load_motion_corrected_movie
+from . io_utils import read_scanimage_stack as read_scanimage_stack
+from . io_utils import read_scanimage_stack_metadata as read_scanimage_stack_metadata
 
 from . conversion_utils import to_16bit as to_16bit
 

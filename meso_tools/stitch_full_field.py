@@ -93,14 +93,41 @@ def check_tiff(tiff_array, meta_dict):
 
     output_tiff_shape =  [pix_res_x*len(rois), pix_res_y]
     raw_len = tiff_array.shape[1]
-    rois_num = rois_num = len(meta_dict['rois'])
-    gap = (raw_len - pix_res_y*rois_num)/(rois_num-1)
+    rois_num = len(meta_dict['rois'])
+    grap = (raw_len - pix_res_y*rois_num)/(rois_num-1)
     expected_tiff_shape = [num_slices*num_repeats, pix_res_y*len(rois)+(gap*(len(rois)-1)), pix_res_x]
     tiff_shape = np.shape(tiff_array)
 
     assert expected_tiff_shape == list(tiff_shape), f"Input tiff shape is unexpected"
 
     return output_tiff_shape, int(gap)
+
+def get_output_shape(stack : np.array, meta_dict : dict) -> int:
+    """
+    get_output_shape : calculate output shape and gap between images inserted vertically in one page of a tiff
+
+    Parameters
+    ----------
+    stack : np.array
+        input stack of images
+    meta_dict : dict
+        dictionary with metadata
+
+    Returns
+    -------
+    int
+        gap in number of pixels
+    """
+    raw_len = stack.shape[1]
+    rois = meta_dict['rois']
+    pix_res_x = rois[0]['scanfields']['pixelResolutionXY'][0]
+    pix_res_y = rois[0]['scanfields']['pixelResolutionXY'][1]
+    rois_num = len(meta_dict['rois'])
+    gap = int((raw_len - pix_res_y*rois_num)/(rois_num-1))
+
+    output_shape =  [pix_res_x*len(rois), pix_res_y]
+
+    return gap, output_shape
 
 def average_tiff(tiff_array, meta):
     """
@@ -121,27 +148,37 @@ def average_tiff(tiff_array, meta):
         averaged_tiff = y
     return averaged_tiff
 
-def average_stack(tiff_array, meta, average_slices = True, average_repeats = True):
+def average_stack(stack: np.array, repeats : int, avg_slices : bool = False, avg_repeats : bool = True) -> np.array:
     """
-    average input tiff over all slices and number of stack repeats
-    return : a single page tiff (2D np.array)
+    average_stack : average input tiff over slices and/or repeats (volumes)
+
+    Parameters
+    ----------
+    stack : np.array
+        input stack to average
+    slices : int
+        slices to average
+    repeats : int
+        number of stack repeats
+    average_slices bool, optional
+        whether to average slices, default None
+    average_repeats bool, optional
+        whether to average repeats, default None
+    Returns
+    -------
+    np.array
+        averaged stack
     """
-    slices = meta['num_slices'] # number of z slices
-    repeats = meta['num_volumes'] # number fo repeats
-    
-    x = tiff_array.reshape(tiff_array.shape[0] // repeats, repeats, tiff_array.shape[1], tiff_array.shape[2]) 
-    
-    if average_repeats :
-        y = x.mean(axis = 1)
-        
-    if average_slices: 
-        y = x.mean(axis = 0)
-    
-    if average_slices & average_repeats:
-        a = x.mean(axis = 1) 
-        y = a.mean(axis = 0)
-        
-    return y
+    stack_reshape = stack.reshape(stack.shape[0] // repeats, repeats, stack.shape[1], stack.shape[2])
+    if avg_repeats:
+        stack_averaged = stack_reshape.mean(axis = 1)
+    if avg_slices:
+        stack_averaged = stack_reshape.mean(axis = 0)
+    if avg_slices & avg_repeats:
+        stack_temp = stack_reshape.mean(axis = 1)
+        stack_averaged = stack_temp.mean(axis = 0)
+    return stack_averaged
+
 
 def stitch_tiff(averaged_tiff, meta_dict, gap, output_tiff_shape):
     """
@@ -294,6 +331,7 @@ if __name__ == "__main__":
     ff_averaged_tiff = average_tiff(tiff_array, ff_meta_dict)
 
     ff_stitched_tiff, ff_meta_dict = stitch_tiff(ff_averaged_tiff, ff_meta_dict, gap, output_tiff_shape)
+
     surface_path = "/Users/nataliaorlova/Code/data/incoming/1180346813_averaged_surface.tiff"
 
     split_surface_meta, surface_averaged = split_surface(surface_path)
