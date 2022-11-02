@@ -148,10 +148,19 @@ def load_motion_corrected_movie(filepath : str, page_num : int =None) -> np.arra
             motion_corrected_movie = motion_corrected_movie_file['data'][page_num:]
     return motion_corrected_movie
 
-def read_scanimage_stack_metadata(metadata):
+def read_scanimage_stack_metadata(metadata : dict) -> dict:
     """
-    reading of the relevant metadata fields
-    return: dict
+    read_scanimage_stack_metadata reads of the relevant metadata fields
+
+    Parameters
+    ----------
+    metadata : dict
+        Dictionary that ocntains full ScanImage etadata dictionary 
+
+    Returns
+    -------
+    dict
+        stripped down dict wiht emtadata for stack only
     """
     md_general = metadata[0]
     stack_metadata = {}
@@ -251,7 +260,6 @@ def read_plane_in_stack(stack_path : str, plane_num : int, repeats : int, slices
     new_filepath = append_suffix_to_filename(stack_path, f'plane{plane_num}')
     write_tiff(new_filepath, stack_plane)
     return stack_plane
-
 
 class LimsApi():
     """
