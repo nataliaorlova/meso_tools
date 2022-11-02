@@ -6,6 +6,7 @@ import tifffile
 import h5py
 import pandas as pd
 import numpy as np
+import os
 from allensdk.internal.api import PostgresQueryMixin
 
 def read_tiff(path_to_tiff : str, page_num : int = None) -> np.array:
@@ -202,6 +203,55 @@ def read_scanimage_stack(tiff_path : str, stack_meta : dict, slices : int = None
         stack = tiff.asarray(frames_to_read)
     
     return stack
+
+def append_suffix_to_filename(filename : str, suffix : str) -> str :
+    """
+    append_suffix_to_filename 
+
+    Parameters
+    ----------
+    filename : str
+        filename to change by adding suffix before extension 
+    suffix : str
+        suffix to append
+
+    Returns
+    -------
+    str
+        filename wihta ppended suffix
+    """
+    basename = os.path.splitext(filename)[0]
+    extension = os.path.splitext(filename)[1]
+    return f"{basename}_{suffix}_{extension}"
+
+
+def read_plane_in_stack(stack_path : str, plane_num : int, repeats : int, slices : int) -> np.array :
+    """
+    read_plane_in_stack returns a timeseries corresponding to one plane fomr a stack with multiple repeats 
+
+    Parameters
+    ----------
+    stack : str
+        local path to stack
+    repeats : int
+        number of reepats of teh stak in np array
+    slices:
+        number of planes in stack
+    Returns
+    -------
+    np.array
+        output stack, aka timeseries
+    """
+    with tifffile.TiffFile(stack_path, mode ='rb') as tiff:
+        tot_frames = len(tiff.pages)
+        repeats = np.divmod(tot_frames, slices)[0]
+        pages_to_read = np.arange(plane_num, slices*repeats+plane_num, slices)
+        stack_plane = tiff.asarray(pages_to_read)
+
+    new_filepath = append_suffix_to_filename(stack_path, f'_plane{plane_num}')
+    write_tiff(new_filepath, stack_plane)
+    return stack_plane
+
 
 class LimsApi():
     """

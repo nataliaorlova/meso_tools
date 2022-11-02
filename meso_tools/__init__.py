@@ -6,6 +6,9 @@ from . io_utils import LimsApi as LimsApi
 from . io_utils import load_motion_corrected_movie as load_motion_corrected_movie
 from . io_utils import read_scanimage_stack as read_scanimage_stack
 from . io_utils import read_scanimage_stack_metadata as read_scanimage_stack_metadata
+from . io_utils import read_si_metadata as read_si_metadata
+from . io_utils import read_plane_in_stack as read_plane_in_stack
+from . io_utils import append_suffix_to_filename as append_suffix_to_filename
 
 from . conversion_utils import to_16bit as to_16bit
 
