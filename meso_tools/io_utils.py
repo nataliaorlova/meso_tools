@@ -93,7 +93,7 @@ def write_h5(path : str, h5_data : Any) -> None:
     with h5py.File(path, 'w') as h5_file:
         h5_file.create_dataset('data', data=h5_data)
 
-def read_si_metadata(path_to_tiff : str) -> dict:
+def read_scanimage_metadata(path_to_tiff : str) -> dict:
     """
     Read ScanImage metadata
     Parameters
@@ -227,7 +227,7 @@ def append_suffix_to_filename(filename : str, suffix : str) -> str :
 
 def read_plane_in_stack(stack_path : str, plane_num : int, repeats : int, slices : int) -> np.array :
     """
-    read_plane_in_stack returns a timeseries corresponding to one plane fomr a stack with multiple repeats 
+    read_plane_in_stack returns a timeseries corresponding to one plane fomr a stack with multiple repeats
 
     Parameters
     ----------
@@ -248,7 +248,7 @@ def read_plane_in_stack(stack_path : str, plane_num : int, repeats : int, slices
         pages_to_read = np.arange(plane_num, slices*repeats+plane_num, slices)
         stack_plane = tiff.asarray(pages_to_read)
 
-    new_filepath = append_suffix_to_filename(stack_path, f'_plane{plane_num}')
+    new_filepath = append_suffix_to_filename(stack_path, f'plane{plane_num}')
     write_tiff(new_filepath, stack_plane)
     return stack_plane
 
