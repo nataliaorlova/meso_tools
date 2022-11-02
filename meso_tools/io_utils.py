@@ -234,7 +234,7 @@ def append_suffix_to_filename(filename : str, suffix : str) -> str :
     return f"{basename}_{suffix}_{extension}"
 
 
-def read_plane_in_stack(stack_path : str, plane_num : int, repeats : int, slices : int) -> np.array :
+def read_plane_in_stack(stack_path : str, plane_num : int, slices : int) -> np.array :
     """
     read_plane_in_stack returns a timeseries corresponding to one plane fomr a stack with multiple repeats
 
@@ -253,13 +253,13 @@ def read_plane_in_stack(stack_path : str, plane_num : int, repeats : int, slices
     """
     with tifffile.TiffFile(stack_path, mode ='rb') as tiff:
         tot_frames = len(tiff.pages)
-        repeats = np.divmod(tot_frames, slices)[0]
-        pages_to_read = np.arange(plane_num, slices*repeats+plane_num, slices)
+        actual_repeats = np.divmod(tot_frames, slices)[0]
+        pages_to_read = np.arange(plane_num, slices*actual_repeats+plane_num, slices)
         stack_plane = tiff.asarray(pages_to_read)
 
     new_filepath = append_suffix_to_filename(stack_path, f'plane{plane_num}')
     write_tiff(new_filepath, stack_plane)
-    return stack_plane
+    return stack_plane, actual_repeats
 
 class LimsApi():
     """
@@ -267,7 +267,6 @@ class LimsApi():
     """
     def __init__(self, lims_credentials : dict):
         """
-
         Parameters
         ----------
         lims_credentials : dict
@@ -434,7 +433,7 @@ class LimsApi():
                     WHERE sp.external_specimen_name = '{mouse_id}' AND oe.workflow_state = 'passed' """
         return pd.read_sql(query, self.lims_db.get_connection())  
 
-    def get_ROI_number_per_experiment(self, exp_id : int) -> int:
+    def get_roi_number_per_experiment(self, exp_id : int) -> int:
         """
         Get number of segmenter ROIs given experiment ID via a direct query to LIMS
         Parameters
