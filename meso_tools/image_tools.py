@@ -1,7 +1,7 @@
 ## this file definse functions to manipulate pixel data:
 ### plot histograms, adjsut contrast, measure SNR, etc
 
-from typing import Tuple, Union, Any
+from typing import Tuple, Union
 import glob
 import numpy as np
 import scipy.stats
@@ -162,7 +162,7 @@ def align_phase(image : np.array, do_align : bool = True, offset : Union[int, No
 
             i=0
             while i < len(image)-1: # loop over each pair of lines to insert original data with offset
-                image_aligned[i,: -offset] = image[i, :]
+                image_aligned[i,: 0-offset] = image[i, :]
                 image_aligned[i+1, offset:] = image[i+1]
                 i += 2
 
