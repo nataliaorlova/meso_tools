@@ -279,7 +279,8 @@ def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
     # bring two piece of data to the same pix/degree (usually this means downsampling surafce tiff arrays)
     # calculate scaling factor
     convert_factor = pixel_resolution_surf/pixel_resolution_ff # XY = XY / XY
-          
+    ff_stitched_mapped = np.copy(ff_stitched_tiff)
+
     # downsampling 
     for i, roi in enumerate(split_surface_meta["rois"]):
         a = roi['array']
@@ -312,9 +313,9 @@ def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
         bottom_left = bottom_left.astype(np.int16)
 
         #insert into full field image:
-        ff_stitched_tiff[top_right[1]:bottom_left[1], top_right[0]:bottom_left[0]] = roi['downsampled_array']
+        ff_stitched_mapped[top_right[1]:bottom_left[1], top_right[0]:bottom_left[0]] = roi['downsampled_array']
 
-    return ff_stitched_tiff
+    return ff_stitched_mapped
 
 if __name__ == "__main__":
 
