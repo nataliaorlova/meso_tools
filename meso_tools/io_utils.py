@@ -6,6 +6,7 @@ import tifffile
 import h5py
 import pandas as pd
 import numpy as np
+import os
 from allensdk.internal.api import PostgresQueryMixin
 
 def read_tiff(path_to_tiff : str, page_num : int = None) -> np.array:
@@ -40,6 +41,7 @@ def read_tiff(path_to_tiff : str, page_num : int = None) -> np.array:
             else:
                 tiff_array = tiff.asarray()
     return tiff_array
+
 
 def write_tiff(path_to_tiff : str, data : np.array) -> None:
     """
@@ -91,7 +93,7 @@ def write_h5(path : str, h5_data : Any) -> None:
     with h5py.File(path, 'w') as h5_file:
         h5_file.create_dataset('data', data=h5_data)
 
-def read_si_metadata(path_to_tiff : str) -> dict:
+def read_scanimage_metadata(path_to_tiff : str) -> dict:
     """
     Read ScanImage metadata
     Parameters
@@ -146,13 +148,125 @@ def load_motion_corrected_movie(filepath : str, page_num : int =None) -> np.arra
             motion_corrected_movie = motion_corrected_movie_file['data'][page_num:]
     return motion_corrected_movie
 
+def read_scanimage_stack_metadata(metadata : dict) -> dict:
+    """
+    read_scanimage_stack_metadata reads of the relevant metadata fields
+
+    Parameters
+    ----------
+    metadata : dict
+        Dictionary that ocntains full ScanImage etadata dictionary 
+
+    Returns
+    -------
+    dict
+        stripped down dict wiht emtadata for stack only
+    """
+    md_general = metadata[0]
+    stack_metadata = {}
+    # stack params
+    stack_metadata['num_slices'] = md_general['SI.hStackManager.actualNumSlices']
+    stack_metadata['num_volumes'] = md_general['SI.hStackManager.actualNumVolumes']
+    stack_metadata['z_step'] = md_general['SI.hStackManager.actualStackZStepSize']
+    stack_metadata['all_zs'] = np.asarray(md_general['SI.hStackManager.zsAllActuators'])[:,1]
+    stack_metadata['frames_per_slice'] = md_general['SI.hStackManager.framesPerSlice']
+    #flag properties:
+    stack_metadata['channel_save'] = md_general['SI.hChannels.channelSave']
+    stack_metadata['stack_type'] = md_general['SI.hStackManager.stackDefinition']
+
+    return stack_metadata
+
+def read_scanimage_stack(tiff_path : str, stack_meta : dict, slices : int = None, volumes : int = None) -> np.array:
+    """
+    read_scanimage_stack reads ScanImage stack from file
+    Parameters
+    ----------
+    tiff_path : str
+        paht to tiff file w stack
+    stack_meta : dict
+        disctionary wiht stack parameters
+    slices : int, optional
+        slices(planes) to read, if None - read all, by default None
+    volumes : int, optional
+        volumes (repeats of the stack) to read, if None - read all, by default None
+
+    Returns
+    -------
+    np.array
+        stack read as numpy array
+    """
+    total_slices = stack_meta['num_slices']
+    total_volumes = stack_meta['num_volumes']
+    
+    if not slices:
+        slices = total_slices
+        
+    if not volumes:
+        volumes = total_volumes
+        
+    frames_to_read = []
+    for repeat in range(volumes):
+        frames_to_read += list(np.linspace(repeat*total_slices,repeat*total_slices+slices,slices))
+
+    with tifffile.TiffFile(tiff_path, mode ='rb') as tiff:
+        stack = tiff.asarray(frames_to_read)
+    
+    return stack
+
+def append_suffix_to_filename(filename : str, suffix : str) -> str :
+    """
+    append_suffix_to_filename 
+
+    Parameters
+    ----------
+    filename : str
+        filename to change by adding suffix before extension 
+    suffix : str
+        suffix to append
+
+    Returns
+    -------
+    str
+        filename wihta ppended suffix
+    """
+    basename = os.path.splitext(filename)[0]
+    extension = os.path.splitext(filename)[1]
+    return f"{basename}_{suffix}_{extension}"
+
+
+def read_plane_in_stack(stack_path : str, plane_num : int, slices : int) -> np.array :
+    """
+    read_plane_in_stack returns a timeseries corresponding to one plane fomr a stack with multiple repeats
+
+    Parameters
+    ----------
+    stack : str
+        local path to stack
+    repeats : int
+        number of reepats of teh stak in np array
+    slices:
+        number of planes in stack
+    Returns
+    -------
+    np.array
+        output stack, aka timeseries
+    """
+    with tifffile.TiffFile(stack_path, mode ='rb') as tiff:
+        tot_frames = len(tiff.pages)
+        actual_repeats = np.divmod(tot_frames, slices)[0]
+        pages_to_read = np.arange(plane_num, slices*actual_repeats+plane_num, slices)
+        stack_plane = tiff.asarray(pages_to_read)
+
+    new_filepath = append_suffix_to_filename(stack_path, f'plane{plane_num}')
+    write_tiff(new_filepath, stack_plane)
+    return stack_plane, actual_repeats
+
 class LimsApi():
     """
     Class with simple queries to LIMS database, must have access to the credentials and read it prior to instantiating the class
     """
     def __init__(self, lims_credentials : dict):
         """
-
         Parameters
         ----------
         lims_credentials : dict
@@ -319,7 +433,7 @@ class LimsApi():
                     WHERE sp.external_specimen_name = '{mouse_id}' AND oe.workflow_state = 'passed' """
         return pd.read_sql(query, self.lims_db.get_connection())  
 
-    def get_ROI_number_per_experiment(self, exp_id : int) -> int:
+    def get_roi_number_per_experiment(self, exp_id : int) -> int:
         """
         Get number of segmenter ROIs given experiment ID via a direct query to LIMS
         Parameters
