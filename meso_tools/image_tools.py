@@ -388,6 +388,23 @@ def compute_photon_flux(image: np.ndarray, stack : bool = False) -> float:
         photon_flux = np.sqrt(np.mean(image.flatten()))
         return photon_flux
 
+def compute_temporal_variance(image_stack: np.array) -> float :
+    """
+    compute_temporal_variance computes mean variance of pixel values in an image stack
+    this is to incorporate temporal variance (biological activity) into imaging quality metric
+    Parameters
+    ----------
+    image_stack : np.array
+        image time series
+
+    Returns
+    -------
+    float
+        temporal variance
+    """
+    image_variance = np.var(image_stack, axis=0)
+    return image_variance.mean(axis=(0,1))
+
 def compute_block_snr(image : np.ndarray, block_shape : tuple, blocks_to_agg : tuple, return_block : bool = False, snr_metric : str = "basic") -> Union[float, tuple]:
     """
     Compute the SNR of nonoverlapping blocks of an image, return aggregate
