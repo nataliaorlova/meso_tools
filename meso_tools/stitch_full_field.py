@@ -267,10 +267,9 @@ def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
     right_corner_ff = np.array([ff_meta_dict['min_x'], ff_meta_dict['min_y']]) #XY 
     print(f"pixel_resolution_ff : {pixel_resolution_ff}")
     
-    sesion_type_1x6 = False
-    for key in split_surface_meta['rois'].keys():
-        if "array" in key:
-            sesion_type_1x6 = True
+    sesion_type_1x6 = True
+    if isinstance(split_surface_meta['rois'], list):
+        sesion_type_1x6 = False
     
     if not sesion_type_1x6: 
         # get pixel resolution and check that resolution of all rois in surface is the same

@@ -4,7 +4,7 @@ dist
 build
 *egg*
 venv
-.ipynb_checkpoints
+*.ipynb_checkpoints
 *checkpoint.ipynb
-.ipynb
+*.ipynb
 .vscode/settings.json
