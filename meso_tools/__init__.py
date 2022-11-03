@@ -27,3 +27,4 @@ from . image_tools import compute_contrast as compute_contrast
 from . image_tools import compute_basic_snr as compute_basic_snr
 from . image_tools import compute_photon_flux as compute_photon_flux
 from . image_tools import compute_block_snr as compute_block_snr
+from . image_tools import compute_temporal_variance as compute_temporal_variance
