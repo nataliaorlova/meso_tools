@@ -67,13 +67,13 @@ def check_meta(meta_dict):
         assert isinstance(roi['scanfields'], dict), f"ROI {i} has more than one scnafield - unable to split"
 
     #checking that all rois are of the same size:
-    pix_res = [roi['scanfields']['pixelResolutionXY'] for roi in  meta_dict['rois']]
+    pix_res = [roi['scanfields']['pixelResolutionXY'] for roi in  meta_dict['rois']] #XY
     assert all(elem == pix_res[0] for elem in pix_res), f'ROIs are not of the same shape, unable to stitch'
 
-    degree_size = [roi['scanfields']['sizeXY'] for roi in  meta_dict['rois']]
+    degree_size = [roi['scanfields']['sizeXY'] for roi in  meta_dict['rois']] # XY
     assert all(elem == degree_size[0] for elem in degree_size), f'ROIs are not of the same size, unable to stitch'
     # take pixel resolution of hte first ROI since we checked that they all are of the same rezolution
-    meta_dict['pixel_to_degree'] = np.array(pix_res[0])/np.array(degree_size[0]) 
+    meta_dict['pixel_to_degree'] = np.array(pix_res[0])/np.array(degree_size[0])  # XY = XY /XY
 
     return meta_dict
 
@@ -259,25 +259,27 @@ def split_surface(path_to_surface):
 def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
 
     # get pixel to degrees for full field data
-    pixel_resolution_ff = ff_meta_dict['pixel_to_degree']
-    right_corner_ff = np.array([ff_meta_dict['min_y'], ff_meta_dict['min_x']])
-
+    pixel_resolution_ff = ff_meta_dict['pixel_to_degree'] #XY
+    print(f"pixel_resolution_ff: {pixel_resolution_ff}, XY")
+    right_corner_ff = np.array([ff_meta_dict['min_x'], ff_meta_dict['min_y']]) #XY 
+          
     # get pixel resolution and check that resolution of all rois in surface is the same
     pix_res = [roi['scanfields']['pixelResolutionXY'] for roi in  split_surface_meta['rois']]
     assert all(elem == pix_res[0] for elem in pix_res), f'ROIs are not of the same shape, unable to stitch'
-    pix_res_surface = np.array(pix_res[0])
+    pix_res_surface = np.array(pix_res[0]) #XY
 
     # get degree size and check that resolution of all rois in surface is the same
     degree_size = [roi['scanfields']['sizeXY'] for roi in  split_surface_meta['rois']]
     assert all(elem == degree_size[0] for elem in degree_size), f'ROIs are not of the same shape, unable to stitch'
-    degree_size_surface = np.array(degree_size[0])
-
+    degree_size_surface = np.array(degree_size[0]) #XY
+          
     # finally, pixel to degree for surface data
-    pixel_resolution_surf = pix_res_surface / degree_size_surface
+    pixel_resolution_surf = pix_res_surface / degree_size_surface # XY = XY / XY
 
-    # bring two piece of data tot eh same pix/degree (usually this means downsampling surafce tiff arrays)
+    # bring two piece of data to the same pix/degree (usually this means downsampling surafce tiff arrays)
     # calculate scaling factor
-    convert_factor = pixel_resolution_surf/pixel_resolution_ff
+    convert_factor = pixel_resolution_surf/pixel_resolution_ff # XY = XY / XY
+          
     # downsampling 
     for i, roi in enumerate(split_surface_meta["rois"]):
         a = roi['array']
@@ -287,21 +289,23 @@ def insert_surface_to_ff(ff_stitched_tiff, ff_meta_dict, split_surface_meta):
     
     for roi in split_surface_meta["rois"]:
         scanfield = roi['scanfields']
-        roi_center = np.array(scanfield['centerXY']) # get center
-        roi_size = np.array(scanfield['sizeXY']) # get size
+        roi_center = np.array(scanfield['centerXY']) # get center, XY
+        roi_size = np.array(scanfield['sizeXY']) # get size, XY
         # convert to pixels
-        roi_center *= pixel_resolution_ff
-        roi_size *= pixel_resolution_ff
+        roi_center *= pixel_resolution_ff # XY = XY * XY
+        roi_size *= pixel_resolution_ff # XY = XY * XY
         # round down
         roi_size = np.floor(roi_size)
         roi_center = np.floor(roi_center)
         # caculate paste coordinates
-        top_right = roi_center - roi_size/2 
-        bottom_left = roi_center + roi_size/2
+        top_right = roi_center - roi_size/2 #XY
+        bottom_left = roi_center + roi_size/2 #XY
 
         # normalize to right top corner    
-        top_right -= (right_corner_ff * pixel_resolution_ff)
-        bottom_left -= (right_corner_ff * pixel_resolution_ff)
+        a = right_corner_ff * pixel_resolution_ff #XY * XY
+        top_right = top_right - a #XY - XY
+        b = right_corner_ff * pixel_resolution_ff #(XY * XY)
+        bottom_left = bottom_left - b #XY - XY
 
         # cast as int
         top_right = top_right.astype(np.int16)
