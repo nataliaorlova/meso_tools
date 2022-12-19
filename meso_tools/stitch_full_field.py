@@ -142,11 +142,11 @@ def get_output_shape(stack : np.array, meta_dict : dict) -> int:
 
 def average_tiff(tiff_array, meta):
     """
-    average input tiff over all slices and number of stack repeats
+    average input tiff over all slices and number of stack repeats (volumes) and frames per plane 
     return : a single page tiff (2D np.array)
     """
     slices = meta['num_volumes'] # number of z slices
-    # let's average eover repeats and slices
+    # let's average over repeats and slices
     # resahpe tp get array of [slices, repeats, y_pix_size, x_pix_size]
     x = tiff_array.reshape(tiff_array.shape[0] // slices, slices, tiff_array.shape[1], tiff_array.shape[2]) 
     # average over slices:
@@ -159,35 +159,48 @@ def average_tiff(tiff_array, meta):
         averaged_tiff = y
     return averaged_tiff
 
-def average_stack(stack: np.array, repeats : int, avg_slices : bool = False, avg_repeats : bool = True) -> np.array:
+def average_stack(stack: np.array, meta: dict, avg_slices : bool = True, avg_repeats : bool = True, avg_frames : bool = True) -> np.array:
     """
-    average_stack : average input tiff over slices and/or repeats (volumes)
-
+    average_stack average stack over repeats of stack, planes or frames per plane
+    Scanimage tiff files are ordered the following way : [number of z slices * number of stack repeats, frames per plane, rows, columns]
     Parameters
     ----------
     stack : np.array
-        input stack to average
-    slices : int
-        slices to average
-    repeats : int
-        number of stack repeats
-    average_slices bool, optional
-        whether to average slices, default None
-    average_repeats bool, optional
-        whether to average repeats, default None
+        numpy array containing teh stack
+    meta : dict
+        dictionary wiht metadata
+    avg_slices : bool, optional
+        whether to average over slices, by default False
+    avg_repeats : bool, optional
+        whether to average over repeats, by default True
+    avg_frames : bool, optional
+        whether to average over frames acquired at teh same plane, by default True
+
     Returns
     -------
     np.array
         averaged stack
     """
+    repeats = meta['num_volumes'] # number of repeats of one stack
+    frames = meta['frames_per_slice'] # number of frames aquired at one z
+
+    # let's first average by frames
+    if avg_frames & (frames !=1):
+        stack = stack.mean(axis=1)
+
+    # reshape to average repeats and slices
     stack_reshape = stack.reshape(stack.shape[0] // repeats, repeats, stack.shape[1], stack.shape[2])
+    # avergae repeats
     if avg_repeats:
         stack_averaged = stack_reshape.mean(axis = 1)
+    # avergae slices
     if avg_slices:
         stack_averaged = stack_reshape.mean(axis = 0)
+    # average both  
     if avg_slices & avg_repeats:
         stack_temp = stack_reshape.mean(axis = 1)
         stack_averaged = stack_temp.mean(axis = 0)
+
     return stack_averaged
 
 
