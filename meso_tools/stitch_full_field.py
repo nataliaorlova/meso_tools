@@ -107,7 +107,6 @@ def check_tiff(tiff_array, meta_dict):
     rois_num = len(meta_dict['rois'])
     gap = (raw_len - pix_res_y*rois_num)/(rois_num-1)
     expected_tiff_shape = [num_slices*num_repeats, pix_res_y*len(rois)+(gap*(len(rois)-1)), pix_res_x]
-    tiff_shape = np.shape(tiff_array)
 
     assert expected_tiff_shape == list(tiff_shape), f"Input tiff shape is unexpected"
 
