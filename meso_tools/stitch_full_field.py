@@ -87,13 +87,23 @@ def check_tiff(tiff_array, meta_dict):
     rois = meta_dict['rois']
     num_slices = meta_dict['num_slices']
     num_repeats = meta_dict['num_volumes']
+    frames_per_plane = meta_dict['frames_per_slice']
+
     # calculate what tiff shape should be:
     
     pix_res_x = rois[0]['scanfields']['pixelResolutionXY'][0]
     pix_res_y = rois[0]['scanfields']['pixelResolutionXY'][1]
 
     output_tiff_shape =  [pix_res_x*len(rois), pix_res_y]
-    raw_len = tiff_array.shape[1]
+    
+    if frames_per_plane != 1:
+        raw_len = tiff_array.shape[2]
+        tiff_array_avg = tiff_array.mean(axis=1)
+        tiff_shape = np.shape(tiff_array_avg)
+    else:
+        raw_len = tiff_array.shape[1]
+        tiff_shape = np.shape(tiff_array)
+
     rois_num = len(meta_dict['rois'])
     gap = (raw_len - pix_res_y*rois_num)/(rois_num-1)
     expected_tiff_shape = [num_slices*num_repeats, pix_res_y*len(rois)+(gap*(len(rois)-1)), pix_res_x]
