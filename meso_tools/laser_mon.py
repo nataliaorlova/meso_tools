@@ -1,5 +1,7 @@
 import pyvisa as visa
-import logging
+import sys
+import numpy as np
+import matplotlib.pylab as pl
 
 class RigolAPI():
     """
@@ -11,18 +13,67 @@ class RigolAPI():
         Make sure only one Rigol Oscilloscope is connected to given host 
         """
         rm = visa.ResourceManager()
-        addresses = rm.list_opened_resources()
+        instruments = rm.list_resources()
         # find rigol device - should be on USB0:
-        for address in addresses:
-            if 'USB' in address:
-                device = rm.open_resource(address)
-                name = device.query("*IDN?")
-                if 'RIGOL' in name:
-                    self.rigol = device
-                    print(f"Found Rigol as {name}\nAt address {address}")
-                    break
-            else:
-                print(f"No USB devices are present")
-        if not self.rigol:
-             print(f"Rigol is not present on your system, check connection. It should be plugged in to one of the USB ports.")
-                
+        usb = list(filter(lambda x: 'USB' in x, instruments))
+        if len(usb) != 1:
+            print('Bad instrument list', instruments)
+            sys.exit(-1)
+        
+        self.scope = rm.open_resource(usb[0]) # bigger timeout for long mem  , 
+
+        # Get the timescale
+        self.timescale = float(self.scope.query(":TIM:SCAL?"))
+        # Get the timescale offset
+        self.timeoffset = float(self.scope.query(":TIM:OFFS?"))
+        self.voltscale = float(self.scope.query(':CHAN1:SCAL?'))
+        # And the voltage offset
+        self.voltoffset = float(self.scope.query(":CHAN1:OFFS?"))
+
+
+        def get_traces(self, channel : str) -> np.array:
+            """
+                Function to get data fomr the oscillsocope's memory
+            Args:
+                channel (str): channel to connect to, CHAN1 or CHAN2
+
+            Returns:
+                np.array: array of datapoint
+            """
+            self.scope.write(":WAV:MODE MAX")
+            self.scope.write(":STOP")
+            self.scope.write(":WAV:FORM ASCii")
+            self.scope.write(f":WAV:SOUR {channel}")
+            self.scope.write(":WAV:POIN 10000")
+            rawdata = self.scope.query(":WAV:DATA?")
+            params = self.scope.query(":WAV:PRE?")
+            self.scope.write(":RUN")
+            params = params.split(',')
+            rawdata=rawdata[11:]
+            data_string = rawdata.split(",")
+            del data_string[-1] # removing new line character
+            self.data = [float(item) for item in data_string]
+            return data
+
+
+        def plot_data(self, data : np.array) -> pl.figure:
+            """
+                Function to generate a figure visualizing the data
+            Args:
+                data (np.array): _description_
+
+            Returns:
+                pl.figure: _description_
+            """
+            
+            sample_rate = float(self.scope.query(':ACQ:SRAT?'))
+            data = np.array(data)
+            total_time = len(data)/sample_rate / self.timescale  
+            time = np.linspace(0,total_time,num=len(data))
+            # Plot the data
+            fig = pl.figure(figsize=[10, 2])
+            pl.plot(time, data)
+            pl.title("Oscilloscope Channel 1")
+            pl.ylabel("Voltage (V)")
+            pl.xlabel("Time ( ns )")
+            pl.show()
