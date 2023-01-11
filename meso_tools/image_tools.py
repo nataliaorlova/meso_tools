@@ -1,7 +1,7 @@
 ## this file definse functions to manipulate pixel data:
 ### plot histograms, adjsut contrast, measure SNR, etc
 
-from typing import Tuple, Union, Any
+from typing import Tuple, Union
 import glob
 import numpy as np
 import scipy.stats
@@ -41,7 +41,7 @@ def get_pixel_hist2d(vector_1 : np.array, vector_2 : np.array, bins : int, fig_s
     Parameters
     ----------
     v1 : np.array
-        data vector 1 
+        data vector 1
     v2 : np.array
         data vector 2
     bins : int
@@ -74,7 +74,7 @@ def get_pixel_hist2d(vector_1 : np.array, vector_2 : np.array, bins : int, fig_s
     plt.title(f"{fit_fn}, R2={np.around(r_value**2, decimals=2)}")
     return fig, slope, offset, r_value
 
-def im_plot(path : str) -> plt.Figure:
+def image_plot(path : str) -> plt.Figure:
     """
     Creates a shows a figure with image at path
 
@@ -88,8 +88,8 @@ def im_plot(path : str) -> plt.Figure:
     plt.Figure
         handles to the figure
     """    
-    im = io.imread(path)
-    fig = plt.imshow(im)
+    image = io.imread(path)
+    fig = plt.imshow(image)
     return fig
 
 def plot_all_colormaps(image : np.array, cmaps : list = CMAPS) -> None:
@@ -162,7 +162,7 @@ def align_phase(image : np.array, do_align : bool = True, offset : Union[int, No
 
             i=0
             while i < len(image)-1: # loop over each pair of lines to insert original data with offset
-                image_aligned[i,: -offset] = image[i, :]
+                image_aligned[i,: 0-offset] = image[i, :]
                 image_aligned[i+1, offset:] = image[i+1]
                 i += 2
 
@@ -387,6 +387,23 @@ def compute_photon_flux(image: np.ndarray, stack : bool = False) -> float:
     else:
         photon_flux = np.sqrt(np.mean(image.flatten()))
         return photon_flux
+
+def compute_temporal_variance(image_stack: np.array) -> float :
+    """
+    compute_temporal_variance computes mean variance of pixel values in an image stack
+    this is to incorporate temporal variance (biological activity) into imaging quality metric
+    Parameters
+    ----------
+    image_stack : np.array
+        image time series
+
+    Returns
+    -------
+    float
+        temporal variance
+    """
+    image_variance = np.var(image_stack, axis=0)
+    return image_variance.mean(axis=(0,1))
 
 def compute_block_snr(image : np.ndarray, block_shape : tuple, blocks_to_agg : tuple, return_block : bool = False, snr_metric : str = "basic") -> Union[float, tuple]:
     """
