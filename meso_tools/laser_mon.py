@@ -47,13 +47,13 @@ class RigolAPI():
         self.scope.write(":WAV:POIN 10000")
         rawdata = self.scope.query(":WAV:DATA?")
         params = self.scope.query(":WAV:PRE?")
-        self.scope.write(":RUN")
         self.sample_rate = float(self.scope.query(':ACQ:SRAT?'))
         params = params.split(',')
         rawdata=rawdata[11:]
         data_string = rawdata.split(",")
         del data_string[-1] # removing new line character
         self.data = [float(item) for item in data_string]
+        self.scope.write(":RUN")
 
 
     def plot_data(self) -> pl.figure:
