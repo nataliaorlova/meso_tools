@@ -48,27 +48,27 @@ class RigolAPI():
             rawdata = self.scope.query(":WAV:DATA?")
             params = self.scope.query(":WAV:PRE?")
             self.scope.write(":RUN")
+            self.sample_rate = float(self.scope.query(':ACQ:SRAT?'))
             params = params.split(',')
             rawdata=rawdata[11:]
             data_string = rawdata.split(",")
             del data_string[-1] # removing new line character
             self.data = [float(item) for item in data_string]
-            return data
 
 
-        def plot_data(self, data : np.array) -> pl.figure:
+        def plot_data(self) -> pl.figure:
             """
                 Function to generate a figure visualizing the data
             Args:
-                data (np.array): _description_
+                data (np.array): array of datapoints, units = volts
 
             Returns:
-                pl.figure: _description_
+                pl.figure: handle to a matplotlib figure
             """
             
-            sample_rate = float(self.scope.query(':ACQ:SRAT?'))
-            data = np.array(data)
-            total_time = len(data)/sample_rate / self.timescale  
+            
+            data = np.array(self.data)
+            total_time = len(data)/self.sample_rate / self.timescale  
             time = np.linspace(0,total_time,num=len(data))
             # Plot the data
             fig = pl.figure(figsize=[10, 2])
