@@ -20,7 +20,7 @@ class RigolAPI():
             print('Bad instrument list', instruments)
             sys.exit(-1)
         
-        self.scope = rm.open_resource(usb[0]) # bigger timeout for long mem  , 
+        self.scope = rm.open_resource(usb[0], open_timeout=20) # bigger timeout for long mem  , 
 
         # Get the timescale
         self.timescale = float(self.scope.query(":TIM:SCAL?"))
@@ -29,7 +29,12 @@ class RigolAPI():
         self.voltscale = float(self.scope.query(':CHAN1:SCAL?'))
         # And the voltage offset
         self.voltoffset = float(self.scope.query(":CHAN1:OFFS?"))
+        self.visa_resource_manager = rm
 
+    def close_connection(self) -> None:
+        """Closes visa connection to the instrument
+        """
+        self.visa_resource.close()
 
     def get_trace(self, channel : str) -> np.array:
         """
@@ -46,9 +51,7 @@ class RigolAPI():
         self.scope.write(f":WAV:SOUR {channel}")
         self.scope.write(":WAV:POIN 10000")
         rawdata = self.scope.query(":WAV:DATA?")
-        params = self.scope.query(":WAV:PRE?")
         self.sample_rate = float(self.scope.query(':ACQ:SRAT?'))
-        params = params.split(',')
         rawdata=rawdata[11:]
         data_string = rawdata.split(",")
         del data_string[-1] # removing new line character
@@ -66,8 +69,8 @@ class RigolAPI():
             pl.figure: handle to a matplotlib figure
         """
         data = np.array(self.data)
-        total_time = len(data)/self.sample_rate / self.timescale  
-        time = np.linspace(0,total_time,num=len(data))
+        total_time = len(data)/self.sample_rate
+        time = np.linspace(0,500,num=len(data))
         # Plot the data
         fig = pl.figure(figsize=[10, 2])
         pl.plot(time, data)
@@ -75,3 +78,13 @@ class RigolAPI():
         pl.ylabel("Voltage (V)")
         pl.xlabel("Time ( ns )")
         pl.show()
+
+    # def calculate_laser_parameters(self) -> dict:
+    #     """
+    #     Function to calculate frequency, and other parameters of the alser pulse
+
+    #     Returns:
+    #         dict: dictionary wiht laser parameters
+    #     """
+    #     data=np.array(self.data)
+    #     freq = np.fft
