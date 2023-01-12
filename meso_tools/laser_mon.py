@@ -2,6 +2,8 @@ import pyvisa as visa
 import sys
 import numpy as np
 import matplotlib.pylab as pl
+# from contextlib import contextmanager
+
 
 class RigolAPI():
     """
@@ -21,7 +23,7 @@ class RigolAPI():
             sys.exit(-1)
         
         self.scope = rm.open_resource(usb[0], open_timeout=20) # bigger timeout for long mem  , 
-
+        rm.close()
         # Get the timescale
         self.timescale = float(self.scope.query(":TIM:SCAL?"))
         # Get the timescale offset
@@ -30,11 +32,8 @@ class RigolAPI():
         # And the voltage offset
         self.voltoffset = float(self.scope.query(":CHAN1:OFFS?"))
         self.visa_resource_manager = rm
-
-    def close_connection(self) -> None:
-        """Closes visa connection to the instrument
-        """
-        self.visa_resource.close()
+        self.usb_device = usb[0]
+        self.scope.close()
 
     def get_trace(self, channel : str) -> np.array:
         """
@@ -45,6 +44,8 @@ class RigolAPI():
         Returns:
             np.array: array of datapoint
         """
+        self.scope.open()
+        self.visa_resource_manager.open_resource(self.)
         self.scope.write(":WAV:MODE MAX")
         self.scope.write(":STOP")
         self.scope.write(":WAV:FORM ASCii")
@@ -55,20 +56,29 @@ class RigolAPI():
         rawdata=rawdata[11:]
         data_string = rawdata.split(",")
         del data_string[-1] # removing new line character
-        self.data = [float(item) for item in data_string]
+        data  = [float(item) for item in data_string]
         self.scope.write(":RUN")
+        self.scope.close()
+        return data
 
+    @property
+    def data_channel1(self) -> np.array:
+        return self.get_trace('CHAN1')
 
-    def plot_data(self) -> pl.figure:
+    @property
+    def data_channel2(self) -> np.array:
+        return self.get_trace('CHAN2')
+
+    def plot_data(self, channel : str) -> pl.figure:
         """
             Function to generate a figure visualizing the data
         Args:
-            data (np.array): array of datapoints, units = volts
+            channel (str): channel from which we get data 'CHAN1' or 'CHAN2'
 
         Returns:
             pl.figure: handle to a matplotlib figure
         """
-        data = np.array(self.data)
+        data = np.array(self.data_channel1)
         total_time = len(data)/self.sample_rate
         time = np.linspace(0,500,num=len(data))
         # Plot the data
