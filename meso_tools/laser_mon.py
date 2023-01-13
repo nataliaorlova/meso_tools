@@ -261,7 +261,11 @@ class RigolAPI():
         np.array
             array of voltage values
         """
-        return self.get_trace('CHAN1')
+        while True:
+            data = self.get_trace('CHAN1')
+            if len(data) != 0:
+                break
+        return data
 
     @property
     def trace_channel2(self) -> np.array:
@@ -273,7 +277,11 @@ class RigolAPI():
         np.array
              array of voltage values
         """
-        return self.get_trace('CHAN2')
+        while True:
+            data = self.get_trace('CHAN2')
+            if len(data) != 0:
+                break
+        return data
 
 
     def plot_data(self, channel : str) -> None:
