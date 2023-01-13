@@ -56,7 +56,7 @@ class RigolAPI():
         except visa.errors.InvalidSession : 
             # if session is gone, reopen and retry
             self.open_scope()
-            self.get_timescale()
+            timescale = self.get_timescale()
         return timescale
 
     @property
@@ -91,7 +91,7 @@ class RigolAPI():
         except visa.errors.InvalidSession : 
             # if session is gone, reopen and retry
             self.open_scope()
-            self.get_time_offset()
+            timeoffset = self.get_time_offset()
         return timeoffset
 
     @property 
@@ -131,7 +131,7 @@ class RigolAPI():
         except visa.errors.InvalidSession : 
             # if session is gone, reopen and retry
             self.open_scope()
-            self.get_voltage_scale()
+            voltage_scale = self.get_voltage_scale()
         return voltage_scale
 
     @property
@@ -170,7 +170,7 @@ class RigolAPI():
         except visa.errors.InvalidSession :
             # if session is gone, reopen and retry
             self.open_scope()
-            self.get_voltage_scale()
+            voltage_offset = self.get_voltage_scale()
         return voltage_offset
 
     @property
@@ -202,7 +202,7 @@ class RigolAPI():
             sample_rate = float(self.scope.query(':ACQ:SRAT?'))
         except visa.errors.InvalidSession :
             self.open_scope()
-            self.get_sample_rate()
+            sample_rate = self.get_sample_rate()
         return sample_rate
 
     @property 
@@ -228,17 +228,22 @@ class RigolAPI():
         Returns:
             np.array: array of datapoint
         """
-        self.scope.write(":WAV:MODE MAX")
-        self.scope.write(":STOP")
-        self.scope.write(":WAV:FORM ASCii")
-        self.scope.write(f":WAV:SOUR {channel}")
-        self.scope.write(":WAV:POIN 10000")
-        rawdata = self.scope.query(":WAV:DATA?")
-        rawdata=rawdata[11:]
-        data_string = rawdata.split(",")
-        del data_string[-1] # removing new line character
-        data  = [float(item) for item in data_string]
-        self.scope.write(":RUN")
+        try :
+            self.scope.session
+            self.scope.write(":WAV:MODE MAX")
+            self.scope.write(":STOP")
+            self.scope.write(":WAV:FORM ASCii")
+            self.scope.write(f":WAV:SOUR {channel}")
+            self.scope.write(":WAV:POIN 10000")
+            rawdata = self.scope.query(":WAV:DATA?")
+            rawdata=rawdata[11:]
+            data_string = rawdata.split(",")
+            del data_string[-1] # removing new line character
+            data  = [float(item) for item in data_string]
+            self.scope.write(":RUN")
+        except visa.errors.InvalidSession:
+            self.open_scope()
+            self.get_trace(channel)
         return np.array(data)
 
     @property
