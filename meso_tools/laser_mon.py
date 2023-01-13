@@ -22,8 +22,7 @@ class RigolAPI():
             print('Bad instrument list', instruments)
             sys.exit(-1)
         
-        self.scope = rm.open_resource(usb[0], open_timeout=20) # bigger timeout for long mem  , 
-        rm.close()
+        self.scope = rm.open_resource(usb[0], open_timeout=20) # bigger timeout for long mem 
         # Get the timescale
         self.timescale = float(self.scope.query(":TIM:SCAL?"))
         # Get the timescale offset
@@ -33,7 +32,7 @@ class RigolAPI():
         self.voltoffset = float(self.scope.query(":CHAN1:OFFS?"))
         self.visa_resource_manager = rm
         self.usb_device = usb[0]
-        self.scope.close()
+
 
     def get_trace(self, channel : str) -> np.array:
         """
@@ -44,8 +43,6 @@ class RigolAPI():
         Returns:
             np.array: array of datapoint
         """
-        self.scope.open()
-        self.visa_resource_manager.open_resource(self.)
         self.scope.write(":WAV:MODE MAX")
         self.scope.write(":STOP")
         self.scope.write(":WAV:FORM ASCii")
@@ -59,7 +56,7 @@ class RigolAPI():
         data  = [float(item) for item in data_string]
         self.scope.write(":RUN")
         self.scope.close()
-        return data
+        return np.array(data)
 
     @property
     def data_channel1(self) -> np.array:
@@ -78,12 +75,18 @@ class RigolAPI():
         Returns:
             pl.figure: handle to a matplotlib figure
         """
-        data = np.array(self.data_channel1)
+        if channel == 1:
+            data = self.data_channel1
+            color = 'orange'
+        elif channel == 2:
+            data = self.data_channel2
+            color = 'blue'
+        
         total_time = len(data)/self.sample_rate
         time = np.linspace(0,500,num=len(data))
         # Plot the data
         fig = pl.figure(figsize=[10, 2])
-        pl.plot(time, data)
+        pl.plot(time, data, color)
         pl.title("Oscilloscope Channel 1")
         pl.ylabel("Voltage (V)")
         pl.xlabel("Time ( ns )")
