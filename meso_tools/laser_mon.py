@@ -124,7 +124,7 @@ class RigolAPI():
             voltage scale
         """
         try :
-            # if session tot he scope is active - send query to retrieve timescale
+            # if session tot he scope is active - send query to retrieve data
             self.scope.session
             # Get the timescale
             voltage_scale = float(self.scope.query(f':{channel}:SCAL?'))
@@ -134,6 +134,18 @@ class RigolAPI():
             self.get_voltage_scale()
         return voltage_scale
 
+    @property
+    def volts_scale_channel1(self) -> float:
+        """ Getter for voltage scale channel 1
+        """
+        return self.get_voltage_scale('CHAN1')
+
+
+    @property
+    def volts_scale_channel2(self) -> float:
+        """ Getter for voltage scale channel 2
+        """
+        return self.get_voltage_scale('CHAN2')
 
     def get_voltage_offset(self, channel : str = "CHAN1") -> float:
         """
@@ -151,34 +163,65 @@ class RigolAPI():
             voltage offset
         """
         try :
-            # if session tot he scope is active - send query to retrieve timescale
+            # if session to the scope is active - send query to retrieve data
             self.scope.session
             # Get the timescale
             voltage_offset = float(self.scope.query(f':{channel}:OFFS?'))
-        except visa.errors.InvalidSession : 
+        except visa.errors.InvalidSession :
             # if session is gone, reopen and retry
             self.open_scope()
             self.get_voltage_scale()
         return voltage_offset
 
-
     @property
-    def volts_scale_channel1(self) -> float:
+    def volts_offset_channel1(self) -> float:
         """ Getter for voltage scale channel 1
         """
-        return self.get_voltage_scale('CHAN1')
+        return self.get_voltage_offset('CHAN1')
 
 
     @property
-    def volts_scale_channel2(self) -> float:
+    def volts_offset_channel2(self) -> float:
         """ Getter for voltage scale channel 2
         """
-        return self.get_voltage_scale('CHAN2')
+        return self.get_voltage_offset('CHAN2')
+
+
+    def get_sample_rate(self) -> float:
+        """
+        get_smaple_rate _summary_
+
+        Returns
+        -------
+        float
+            _description_
+        """
+        try :
+            # if session to the scope is active - send query to retrieve data
+            self.scope.session
+            sample_rate = float(self.scope.query(':ACQ:SRAT?'))
+        except visa.errors.InvalidSession :
+            self.open_scope()
+            self.get_sample_rate()
+        return sample_rate
+
+    @property 
+    def sample_rate(self) -> float:
+        """
+        sample_rate property for the get sample rate
+
+        Returns
+        -------
+        float
+            sample rate
+        """
+        return self.get_sample_rate()
+
         
 
     def get_trace(self, channel : str) -> np.array:
         """
-            Function to get data fomr the oscillsocope's memory
+            Function to get trace values from the oscillsocope's memory
         Args:
             channel (str): channel to connect to, CHAN1 or CHAN2
 
@@ -191,7 +234,6 @@ class RigolAPI():
         self.scope.write(f":WAV:SOUR {channel}")
         self.scope.write(":WAV:POIN 10000")
         rawdata = self.scope.query(":WAV:DATA?")
-        self.sample_rate = float(self.scope.query(':ACQ:SRAT?'))
         rawdata=rawdata[11:]
         data_string = rawdata.split(",")
         del data_string[-1] # removing new line character
@@ -200,13 +242,21 @@ class RigolAPI():
         return np.array(data)
 
     @property
-    def data_channel1(self) -> np.array:
+    def trace_channel1(self) -> np.array:
         return self.get_trace('CHAN1')
 
     @property
-    def data_channel2(self) -> np.array:
+    def trace_channel2(self) -> np.array:
+        """
+        trace_channel2 _summary_
+
+        Returns
+        -------
+        np.array
+            _description_
+        """
         return self.get_trace('CHAN2')
-        
+
 
     def plot_data(self, channel : str) -> None:
         """
@@ -218,10 +268,10 @@ class RigolAPI():
             pl.figure: handle to a matplotlib figure
         """
         if channel == 1:
-            data = self.data_channel1
+            data = self.trace_channel1
             color = 'orange'
         elif channel == 2:
-            data = self.data_channel2
+            data = self.trace_channel2
             color = 'blue'
         
         total_time = len(data)/self.sample_rate
