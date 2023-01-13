@@ -21,18 +21,160 @@ class RigolAPI():
         if len(usb) != 1:
             print('Bad instrument list', instruments)
             sys.exit(-1)
-        
-        self.scope = rm.open_resource(usb[0], open_timeout=20) # bigger timeout for long mem 
-        # Get the timescale
-        self.timescale = float(self.scope.query(":TIM:SCAL?"))
-        # Get the timescale offset
-        self.timeoffset = float(self.scope.query(":TIM:OFFS?"))
-        self.voltscale = float(self.scope.query(':CHAN1:SCAL?'))
-        # And the voltage offset
-        self.voltoffset = float(self.scope.query(":CHAN1:OFFS?"))
-        self.visa_resource_manager = rm
         self.usb_device = usb[0]
+        self.scope = rm.open_resource(self.usb_device, open_timeout=20) # bigger timeout for long calls to memory
+    
 
+    def open_scope(self, timeout=20):
+        """
+        open_scope reopen a communication session with the scope 
+
+        Parameters
+        ----------
+        timeout : int, optional
+            timeout, by default 20
+        """
+        rm = visa.ResourceManager()
+        self.scope = rm.open_resource(self.usb_device, open_timeout=timeout) # bigger timeout for long mem 
+        return 
+
+
+    def get_timescale(self) -> float:
+        """
+        get_timescale send query to retrieve timescale 
+
+        Returns
+        -------
+        float
+            timescale
+        """
+        try :
+            # if session to the scope is active - send query to retrieve timescale
+            self.scope.session
+            # Get the timescale
+            timescale = float(self.scope.query(":TIM:SCAL?"))
+        except visa.errors.InvalidSession : 
+            # if session is gone, reopen and retry
+            self.open_scope()
+            self.get_timescale()
+        return timescale
+
+    @property
+    def timescale(self) -> float:
+        """
+        timescale property getter for timescale
+
+        Returns
+        -------
+        float
+            timescale
+            
+        """
+        return self.get_timescale
+
+    
+    def get_time_offset(self) -> float:
+        """
+        get_timescale sends query to retrieve time offset (horisontal shift)
+
+        Returns
+        -------
+        float
+            time offset
+            
+        """
+        try :
+            # if session tot he scope is active - send query to retrieve timescale
+            self.scope.session
+            # Get the timescale
+            timeoffset = float(self.scope.query(":TIM:OFFS?"))
+        except visa.errors.InvalidSession : 
+            # if session is gone, reopen and retry
+            self.open_scope()
+            self.get_time_offset()
+        return timeoffset
+
+    @property 
+    def time_offset(self) -> float : 
+        """
+        time_offset property for get_time_offset
+
+        Returns
+        -------
+        float
+            time offset
+        """
+        return self.get_time_offset()
+
+
+
+    def get_voltage_scale(self, channel : str = "CHAN1") -> float:
+        """
+        get_voltage_scale  - send query to the scope to get the voltage scale 
+
+        Parameters
+        ----------
+        channel : str
+            channel which we're reading vlaues for, one of ["CHAN1", "CHAN2", "CHAN3" "CHAN4"] 
+            default "CHAN1"
+
+        Returns
+        -------
+        float
+            voltage scale
+        """
+        try :
+            # if session tot he scope is active - send query to retrieve timescale
+            self.scope.session
+            # Get the timescale
+            voltage_scale = float(self.scope.query(f':{channel}:SCAL?'))
+        except visa.errors.InvalidSession : 
+            # if session is gone, reopen and retry
+            self.open_scope()
+            self.get_voltage_scale()
+        return voltage_scale
+
+
+    def get_voltage_offset(self, channel : str = "CHAN1") -> float:
+        """
+        get_voltage_scale  - send query to the scope to get the voltage offset 
+
+        Parameters
+        ----------
+        channel : str
+            channel which we're reading values for, one of ["CHAN1", "CHAN2", "CHAN3" "CHAN4"] 
+            default "CHAN1"
+
+        Returns
+        -------
+        float
+            voltage offset
+        """
+        try :
+            # if session tot he scope is active - send query to retrieve timescale
+            self.scope.session
+            # Get the timescale
+            voltage_offset = float(self.scope.query(f':{channel}:OFFS?'))
+        except visa.errors.InvalidSession : 
+            # if session is gone, reopen and retry
+            self.open_scope()
+            self.get_voltage_scale()
+        return voltage_offset
+
+
+    @property
+    def volts_scale_channel1(self) -> float:
+        """ Getter for voltage scale channel 1
+        """
+        return self.get_voltage_scale('CHAN1')
+
+
+    @property
+    def volts_scale_channel2(self) -> float:
+        """ Getter for voltage scale channel 2
+        """
+        return self.get_voltage_scale('CHAN2')
+        
 
     def get_trace(self, channel : str) -> np.array:
         """
@@ -64,8 +206,9 @@ class RigolAPI():
     @property
     def data_channel2(self) -> np.array:
         return self.get_trace('CHAN2')
+        
 
-    def plot_data(self, channel : str) -> pl.figure:
+    def plot_data(self, channel : str) -> None:
         """
             Function to generate a figure visualizing the data
         Args:
@@ -90,6 +233,7 @@ class RigolAPI():
         pl.ylabel("Voltage (V)")
         pl.xlabel("Time ( ns )")
         pl.show()
+
 
     # def calculate_laser_parameters(self) -> dict:
     #     """
