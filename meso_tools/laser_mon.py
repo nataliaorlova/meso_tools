@@ -55,7 +55,6 @@ class RigolAPI():
         del data_string[-1] # removing new line character
         data  = [float(item) for item in data_string]
         self.scope.write(":RUN")
-        self.scope.close()
         return np.array(data)
 
     @property
