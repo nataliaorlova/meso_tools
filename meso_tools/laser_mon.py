@@ -2,7 +2,7 @@ import pyvisa as visa
 import sys
 import numpy as np
 import matplotlib.pylab as pl
-# from contextlib import contextmanager
+import time
 
 
 class RigolAPI():
@@ -231,34 +231,47 @@ class RigolAPI():
         try :
             self.scope.session
             self.scope.write(":WAV:MODE MAX")
+            time.sleep(0.1)
             self.scope.write(":STOP")
+            time.sleep(0.1)
             self.scope.write(":WAV:FORM ASCii")
+            time.sleep(0.1)
             self.scope.write(f":WAV:SOUR {channel}")
+            time.sleep(0.1)
             self.scope.write(":WAV:POIN 10000")
+            time.sleep(0.1)
             rawdata = self.scope.query(":WAV:DATA?")
+            time.sleep(1)
             rawdata=rawdata[11:]
             data_string = rawdata.split(",")
             del data_string[-1] # removing new line character
-            data  = [float(item) for item in data_string]
+            data  = np.array([float(item) for item in data_string])
             self.scope.write(":RUN")
         except visa.errors.InvalidSession:
             self.open_scope()
-            self.get_trace(channel)
-        return np.array(data)
+            data = self.get_trace(channel)
+        return data
 
     @property
     def trace_channel1(self) -> np.array:
+        """ Trace from channel 1
+
+        Returns:
+        --------
+        np.array
+            array of voltage values
+        """
         return self.get_trace('CHAN1')
 
     @property
     def trace_channel2(self) -> np.array:
         """
-        trace_channel2 _summary_
+        Trace from channel 2
 
         Returns
         -------
         np.array
-            _description_
+             array of voltage values
         """
         return self.get_trace('CHAN2')
 
@@ -284,7 +297,7 @@ class RigolAPI():
         # Plot the data
         fig = pl.figure(figsize=[10, 2])
         pl.plot(time, data, color)
-        pl.title("Oscilloscope Channel 1")
+        pl.title(f"Oscilloscope Channel {channel}")
         pl.ylabel("Voltage (V)")
         pl.xlabel("Time ( ns )")
         pl.show()
