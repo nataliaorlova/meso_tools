@@ -300,8 +300,9 @@ class RigolAPI():
             data = self.trace_channel2
             color = 'blue'
         
-        total_time = len(data)/self.sample_rate
-        time = np.linspace(0,500,num=len(data))
+        num_points = len(data)
+        waveform_length = num_points/self.sample_rate*10**9
+        time = np.linspace(0,waveform_length,num=len(data))
         # Plot the data
         fig = pl.figure(figsize=[10, 2])
         pl.plot(time, data, color)
