@@ -309,14 +309,30 @@ class RigolAPI():
         pl.ylabel("Voltage (V)")
         pl.xlabel("Time ( ns )")
         pl.show()
+        return
+
+    def get_trace_frequency(self, channel : int = 1) -> float:
+        """Get frequency on teh trace, assuming sinewave or close to it
+
+        Args:
+            channel (int): channel from which we get data, 1,2,3 or 4, default 1
+
+        Returns:
+            float: frequency in Hz
+        """
+        try :
+            self.scope.session
+            frequency = self.scope.query(f"MEAS:ITEM? FREQ,CHAN{channel}")
+        except visa.errors.InvalidSession:
+            self.open_scope()
+            frequency = self.get_trace_frequency(channel)
+        return frequency
 
 
-    # def calculate_laser_parameters(self) -> dict:
-    #     """
-    #     Function to calculate frequency, and other parameters of the alser pulse
+    @property
+    def trace_frequency_channel1(self):
+        return self.get_trace_frequency(1)
 
-    #     Returns:
-    #         dict: dictionary wiht laser parameters
-    #     """
-    #     data=np.array(self.data)
-    #     freq = np.fft
+    @property
+    def trace_frequency_channel2(self):
+        return self.get_trace_frequency(1)
