@@ -70,7 +70,7 @@ class RigolAPI():
             timescale
             
         """
-        return self.get_timescale
+        return self.get_timescale()
 
     
     def get_time_offset(self) -> float:
