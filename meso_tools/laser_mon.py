@@ -335,4 +335,4 @@ class RigolAPI():
 
     @property
     def trace_frequency_channel2(self):
-        return self.get_trace_frequency(1)
+        return self.get_trace_frequency(2)
