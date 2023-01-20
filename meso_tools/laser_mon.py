@@ -327,8 +327,7 @@ class RigolAPI():
         except visa.errors.InvalidSession:
             self.open_scope()
             frequency = self.get_trace_frequency(channel)
-        return frequency
-
+        return float(frequency)
 
     @property
     def trace_frequency_channel1(self):
