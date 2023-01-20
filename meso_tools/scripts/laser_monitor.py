@@ -23,7 +23,7 @@ if __name__ == "__main__":
         ch1_freq = rigol.trace_frequency_channel1
         
         if  abs( 79*(10**6) - ch1_freq ) > 0.1 or abs(ch1_freq - 81*(10**6) ) > 0.1 :
-            logging.warning(f"Laser requency reported is  {ch1_freq / (10**6)} MHz")
+            logging.warning(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")
         else:
             logging.info(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")
 
