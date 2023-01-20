@@ -1,5 +1,6 @@
-import pyvisa as visa
 import sys
+import time
+import pyvisa as visa
 import numpy as np
 import matplotlib.pylab as pl
 import time
@@ -217,7 +218,6 @@ class RigolAPI():
         """
         return self.get_sample_rate()
 
-        
 
     def get_trace(self, channel : str) -> np.array:
         """
