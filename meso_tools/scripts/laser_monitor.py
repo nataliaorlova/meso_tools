@@ -12,7 +12,7 @@ import logging
 from meso_tools.laser_mon import *
 from mpetk import mpeconfig
 import time
-from . import __version__
+from .. import __version__
 
 if __name__ == "__main__":
 
