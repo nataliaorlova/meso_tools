@@ -1,4 +1,4 @@
-__vesrion__ = '0.0.1'
+__version__ = '0.0.1'
 __author__ = 'nataliaorlova'
 
 from . io_utils import read_tiff as read_tiff

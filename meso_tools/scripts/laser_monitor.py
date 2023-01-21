@@ -12,11 +12,12 @@ import logging
 from meso_tools.laser_mon import *
 from mpetk import mpeconfig
 import time
+from . import __version__
 
 if __name__ == "__main__":
 
     #seting up log file:
-    mpeconfig.source_configuration("laser_monitoring", fetch_project_config=False)
+    mpeconfig.source_configuration("laser_monitoring", fetch_project_config=False, version=__version__)
     rigol = RigolAPI()
 
     while True:
