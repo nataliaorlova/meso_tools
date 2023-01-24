@@ -155,12 +155,12 @@ def read_scanimage_stack_metadata(metadata : dict) -> dict:
     Parameters
     ----------
     metadata : dict
-        Dictionary that ocntains full ScanImage etadata dictionary 
+        Dictionary that contains full ScanImage etadata dictionary 
 
     Returns
     -------
     dict
-        stripped down dict wiht emtadata for stack only
+        stripped down dict wiht emetadata for stack only
     """
     md_general = metadata[0]
     stack_metadata = {}
