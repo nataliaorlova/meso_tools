@@ -12,20 +12,21 @@ import logging
 from meso_tools.laser_mon import *
 from mpetk import mpeconfig
 import time
-from .. import __version__
+import math
+from meso_tools import __version__
 
 if __name__ == "__main__":
 
     #seting up log file:
-    mpeconfig.source_configuration("laser_monitoring", fetch_project_config=False, version=__version__)
+    mpeconfig.source_configuration("laser_monitoring", fetch_project_config=False, version=__version__, hosts="eng-mindscope:2181")
     rigol = RigolAPI()
 
     while True:
         ch1_freq = rigol.trace_frequency_channel1
         
-        if  abs( 79*(10**6) - ch1_freq ) > 0.1 or abs(ch1_freq - 81*(10**6) ) > 0.1 :
-            logging.warning(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")
-        else:
+        if  math.isclose(ch1_freq, 80*(10**6), abs_tol=5*10**6) :
             logging.info(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")
+        else:
+            logging.warning(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")
 
         time.sleep(10)
