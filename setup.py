@@ -54,8 +54,12 @@ if __name__ == '__main__':
             'matplotlib',
             'scikit-image',
             'pandas',
+            'psycopg2',
+            'pyvisa',
             'glob',
             'sciris',
+            'scikit-image',
+            'scipy',
             'allensdk==2.11.3'],
 
         dependency_links = [],

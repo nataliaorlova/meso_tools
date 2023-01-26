@@ -1,3 +1,6 @@
+__version__ = '0.0.1'
+__author__ = 'nataliaorlova'
+
 from . io_utils import read_tiff as read_tiff
 from . io_utils import write_tiff as write_tiff
 from . io_utils import read_h5 as read_h5
@@ -28,3 +31,5 @@ from . image_tools import compute_basic_snr as compute_basic_snr
 from . image_tools import compute_photon_flux as compute_photon_flux
 from . image_tools import compute_block_snr as compute_block_snr
 from . image_tools import compute_temporal_variance as compute_temporal_variance
+
+from . laser_mon import RigolAPI as RigolAPI
