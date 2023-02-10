@@ -22,11 +22,9 @@ if __name__ == "__main__":
     rigol = RigolAPI()
 
     while True:
-        ch1_freq = rigol.trace_frequency_channel1
-        
+        ch1_freq = rigol.trace_frequency_channel1  
         if  math.isclose(ch1_freq, 80*(10**6), abs_tol=5*10**6) :
-            logging.info(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")
+            logging.info(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")   
         else:
-            logging.warning(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")
-
+            logging.warning(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz") 
         time.sleep(10)
