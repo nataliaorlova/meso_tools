@@ -13,8 +13,7 @@ import np_logging.handlers as handlers
 from meso_tools.laser_mon import *
 import time
 import math
-from meso_tools import __version__
-import np_logging
+from meso_tools import __version__, __rigID__
 
 if __name__ == "__main__":
 
@@ -24,8 +23,8 @@ if __name__ == "__main__":
     logger.addHandler(handlers.FileHandler(logs_dir="C:\\Users\\nataliao\\Documents\\Logs\\", level=logging.WARNING))
     logger.addHandler(handlers.FileHandler(logs_dir="C:\\Users\\nataliao\\Documents\\Logs\\", level=logging.INFO))
     logger.addHandler(handlers.ConsoleHandler())
-    logger.addHandler(handlers.EmailHandler("nataliao@alleninstitute.org", project_name = "laser monitoring", level=logging.WARNING))
-    logger.addHandler(handlers.ServerHandler(project_name= "laser monitoring", level=logging.WARNING))
+    logger.addHandler(handlers.EmailHandler("nataliao@alleninstitute.org", project_name = f"laser monitoring {__rigID__}", level=logging.WARNING))
+    logger.addHandler(handlers.ServerHandler(project_name = f"laser monitoring {__rigID__}", level=logging.WARNING))
 
     #seting up Rigol API
     rigol = RigolAPI()

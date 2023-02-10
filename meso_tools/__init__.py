@@ -1,5 +1,6 @@
 __version__ = '0.0.1'
 __author__ = 'nataliaorlova'
+__rigID__ = "Meso.1"
 
 # from . io_utils import read_tiff as read_tiff
 # from . io_utils import write_tiff as write_tiff
