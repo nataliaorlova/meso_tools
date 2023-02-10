@@ -9,22 +9,32 @@
 
 
 import logging
+import np_logging.handlers as handlers
 from meso_tools.laser_mon import *
-from mpetk import mpeconfig
 import time
 import math
 from meso_tools import __version__
+import np_logging
 
 if __name__ == "__main__":
 
+    logger = logging.getLogger()
+    logger.setLevel("INFO")
+    logger.addHandler(handlers.FileHandler(logs_dir="C:\\Users\\nataliao\\Documents\\Logs\\", level=logging.WARNING))
+    logger.addHandler(handlers.FileHandler(logs_dir="C:\\Users\\nataliao\\Documents\\Logs\\", level=logging.INFO))
+    logger.addHandler(handlers.ConsoleHandler())
+    
     #seting up log file:
-    mpeconfig.source_configuration("laser_monitoring", fetch_project_config=False, version=__version__, hosts="eng-mindscope:2181")
+    weblogger = np_logging.web("laser_monitoring")
+    email_logger = np_logging.email("nataliao@alleninstitute.org", subject="Laser frequency logging info")
     rigol = RigolAPI()
 
     while True:
         ch1_freq = rigol.trace_frequency_channel1  
         if  math.isclose(ch1_freq, 80*(10**6), abs_tol=5*10**6) :
-            logging.info(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")   
+            logger.info(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")  
         else:
-            logging.warning(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz") 
+            logger.warning(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")
+            weblogger.warning(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz") 
+            # email_logger.warning(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")
         time.sleep(10)
