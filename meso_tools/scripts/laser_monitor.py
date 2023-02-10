@@ -18,15 +18,16 @@ import np_logging
 
 if __name__ == "__main__":
 
+    #seting up logging handlers for logfiles, console, email and web servers. 
     logger = logging.getLogger()
     logger.setLevel("INFO")
     logger.addHandler(handlers.FileHandler(logs_dir="C:\\Users\\nataliao\\Documents\\Logs\\", level=logging.WARNING))
     logger.addHandler(handlers.FileHandler(logs_dir="C:\\Users\\nataliao\\Documents\\Logs\\", level=logging.INFO))
     logger.addHandler(handlers.ConsoleHandler())
-    
-    #seting up log file:
-    weblogger = np_logging.web("laser_monitoring")
-    email_logger = np_logging.email("nataliao@alleninstitute.org", subject="Laser frequency logging info")
+    logger.addHandler(handlers.EmailHandler("nataliao@alleninstitute.org", project_name = "laser monitoring", level=logging.WARNING))
+    logger.addHandler(handlers.ServerHandler(project_name= "laser monitoring", level=logging.WARNING))
+
+    #seting up Rigol API
     rigol = RigolAPI()
 
     while True:
@@ -35,6 +36,4 @@ if __name__ == "__main__":
             logger.info(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")  
         else:
             logger.warning(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")
-            weblogger.warning(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz") 
-            # email_logger.warning(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")
         time.sleep(10)
