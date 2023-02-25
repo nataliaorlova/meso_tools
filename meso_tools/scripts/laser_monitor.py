@@ -9,23 +9,30 @@
 
 
 import logging
+import np_logging.handlers as handlers
 from meso_tools.laser_mon import *
-from mpetk import mpeconfig
 import time
-from .. import __version__
+import math
+from meso_tools import __version__, __rigID__
 
 if __name__ == "__main__":
 
-    #seting up log file:
-    mpeconfig.source_configuration("laser_monitoring", fetch_project_config=False, version=__version__)
+    #seting up logging handlers for logfiles, console, email and web servers. 
+    logger = logging.getLogger()
+    logger.setLevel("INFO")
+    logger.addHandler(handlers.FileHandler(logs_dir="C:\\Users\\nataliao\\Documents\\Logs\\", level=logging.WARNING))
+    logger.addHandler(handlers.FileHandler(logs_dir="C:\\Users\\nataliao\\Documents\\Logs\\", level=logging.INFO))
+    logger.addHandler(handlers.ConsoleHandler())
+    logger.addHandler(handlers.EmailHandler("nataliao@alleninstitute.org", project_name = f"laser monitoring {__rigID__}", level=logging.WARNING))
+    logger.addHandler(handlers.ServerHandler(project_name = f"laser monitoring {__rigID__}", level=logging.WARNING))
+
+    #seting up Rigol API
     rigol = RigolAPI()
 
     while True:
-        ch1_freq = rigol.trace_frequency_channel1
-        
-        if  abs( 79*(10**6) - ch1_freq ) > 0.1 or abs(ch1_freq - 81*(10**6) ) > 0.1 :
-            logging.warning(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")
+        ch1_freq = rigol.trace_frequency_channel1  
+        if  math.isclose(ch1_freq, 80*(10**6), abs_tol=5*10**6) :
+            logger.info(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")  
         else:
-            logging.info(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")
-
+            logger.warning(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")
         time.sleep(10)
