@@ -35,4 +35,4 @@ if __name__ == "__main__":
             logger.info(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")  
         else:
             logger.warning(f"Laser frequency reported is  {ch1_freq / (10**6)} MHz")
-        time.sleep(10)
+        time.sleep(0.1)
