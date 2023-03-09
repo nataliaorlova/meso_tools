@@ -90,7 +90,7 @@ class NASapi():
                 return folders
             if self.hostname == 'ophys_backup':
                 folders = ['meso_backup/data_backup',
-                'meso_backup_full/data_backup']
+                'meso_backup_volume1/data_backup']
                 self.folders = folders
                 return folders
 
