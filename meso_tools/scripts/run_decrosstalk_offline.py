@@ -8,8 +8,6 @@ import mindscope_qc.data_access.from_lims as from_lims
 import glob
 
 import tempfile
-import time
-import json
 import pathlib
 import numpy as np
 
