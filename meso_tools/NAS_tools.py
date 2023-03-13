@@ -90,7 +90,7 @@ class NASapi():
                 return folders
             if self.hostname == 'ophys_backup':
                 folders = ['meso_backup/data_backup',
-                'meso_backup_full/data_backup']
+                'meso_backup_volume1/data_backup']
                 self.folders = folders
                 return folders
 
@@ -188,32 +188,6 @@ class NASapi():
         str(task_id)+"%22&_sid="+self.sid, timeout = 5)
 
         return response
-
-
-    def recycle_empty(self, folder: str, delete: bool = True):
-        """Empty the recycle bin for a selected folder
-
-        Parameters
-        ----------
-        folder : str
-            filepath to the top level directory from which you deleted files from
-        delete: bool, default to True
-            Determine wether call to this function will actually delete files
-        """
-
-        path = folder.split('/')
-        path.insert(1, '#recycle')
-        path = '/'.join(path)
-        print(f'Emptying {path} from NAS recycle bin')
-        if delete is True:
-            #start deletion
-            response = requests.get("http://"+self.ip+
-            "/webapi/entry.cgi?api=SYNO.FileStation.Delete&version=2&method=start&path=%22%2F"+
-            str(path)+"%22&_sid="+self.sid, timeout = 5)
-            #save task id for the current deletion job
-            task_id = response.json()['data']['taskid']
-            #store task ID's for later in case we need to stop a job
-            self.task_id = task_id
 
 
     def nas_logout(self):
