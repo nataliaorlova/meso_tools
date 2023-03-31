@@ -55,7 +55,6 @@ if __name__ == '__main__':
             'scikit-image',
             'pandas',
             'psycopg2',
-            'pyvisa',
             'glob',
             'sciris',
             'scikit-image',
