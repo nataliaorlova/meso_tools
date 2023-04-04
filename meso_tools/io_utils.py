@@ -124,15 +124,15 @@ def get_roi_data(path_to_tiff : str) -> dict:
     meta_data = tifffile.read_scanimage_metadata(open(path_to_tiff, 'rb'))
     return meta_data[1]
 
-def load_motion_corrected_movie(filepath : str, page_num : int =None) -> np.array:
+def load_motion_corrected_movie(filepath : str, page_num : list = None) -> np.array:
     """
     Load motion corrected movie as numpy array; whole or some pages
     Parameters
     ----------
     filepath : str
         absolute path to teh hdf5 file with movie
-    page_num : int, optional
-        number of pages to load, if given
+    page_num : list, optional
+        number of pages to load or tuple wiht range of images to load
 
     Returns
     -------
@@ -142,6 +142,8 @@ def load_motion_corrected_movie(filepath : str, page_num : int =None) -> np.arra
     with h5py.File(filepath, 'r') as motion_corrected_movie_file:
         if not page_num:        
             motion_corrected_movie = motion_corrected_movie_file['data']
+        elif isinstance(page_num, list):
+            motion_corrected_movie = motion_corrected_movie_file['data'][page_num[0]:page_num[1]]
         elif page_num > 0:
             motion_corrected_movie = motion_corrected_movie_file['data'][:page_num]
         else: 
