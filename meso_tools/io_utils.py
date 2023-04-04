@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import os
 from allensdk.internal.api import PostgresQueryMixin
+from typing import Tuple
 
 def read_tiff(path_to_tiff : str, page_num : int = None) -> np.array:
     """
@@ -93,6 +94,7 @@ def write_h5(path : str, h5_data : Any) -> None:
     with h5py.File(path, 'w') as h5_file:
         h5_file.create_dataset('data', data=h5_data)
 
+
 def read_scanimage_metadata(path_to_tiff : str) -> dict:
     """
     Read ScanImage metadata
@@ -126,7 +128,7 @@ def get_roi_data(path_to_tiff : str) -> dict:
 
 def load_motion_corrected_movie(filepath : str, page_num : list = None) -> np.array:
     """
-    Load motion corrected movie as numpy array; whole or some pages
+    Load motion corrected movie as numpy array as a whole or range of pages
     Parameters
     ----------
     filepath : str
@@ -149,6 +151,25 @@ def load_motion_corrected_movie(filepath : str, page_num : list = None) -> np.ar
         else: 
             motion_corrected_movie = motion_corrected_movie_file['data'][page_num:]
     return motion_corrected_movie
+
+def get_movie_shape(filepath : str) -> Tuple:
+    """
+    Get movie's shape
+    Parameters
+    ----------
+    filepath : str
+        absolute path to teh hdf5 file with movie
+    Returns
+    -------
+    movie_shape : Tuple
+        shape of the movie 
+    """    
+    assert isinstance(filepath, str), "Filepath should be string"
+    assert os.path.isfile(filepath), "Filepath is incorrect"
+
+    with h5py.File(filepath, 'r') as motion_corrected_movie_file:
+        movie_shape = motion_corrected_movie_file['data'].shape
+    return movie_shape
 
 def read_scanimage_stack_metadata(metadata : dict) -> dict:
     """
