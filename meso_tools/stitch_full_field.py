@@ -265,14 +265,22 @@ def split_surface(path_to_surface):
 
     surface_array = read_tiff(path_to_surface)
     surface_meta = get_meta(path_to_surface)
+
     surface_meta_dict = {}
     surface_meta_dict['rois'] = surface_meta[1]['RoiGroups']['imagingRoiGroup']['rois']
     surface_meta_dict['num_repeats'] = surface_meta[0]['SI.hStackManager.actualNumVolumes']
-    surface_meta_dict['num_rois'] = len(surface_meta_dict['rois'])
 
+    # handling 1 or more than 1 ROIs in tiff metadata 
+    if isinstance(surface_meta[1]['RoiGroups']['imagingRoiGroup']['rois'], list):
+        surface_meta_dict['num_rois'] = len(surface_meta_dict['rois'])
+    elif isinstance(surface_meta[1]['RoiGroups']['imagingRoiGroup']['rois'], dict):
+        surface_meta_dict['num_rois'] = 1
+        
     # averaging over number of repeats: 
     surface_averaged = np.average(surface_array.reshape(surface_meta_dict['num_repeats'], -1, surface_array.shape[1], surface_array.shape[2]), axis=0)
     
+    assert surface_averaged.shape[0] == surface_meta_dict['num_rois'], f"Metadata of the surface file reports {surface_meta_dict['num_rois']} rois, while tiff file has data for {surface_averaged.shape[0]}"
+
     if surface_averaged.shape[0] != 1:
         for i in range(len(surface_meta_dict['rois'])):
             surface_meta_dict['rois'][i]['array'] = surface_averaged[i, :,:]
