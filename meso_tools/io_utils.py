@@ -523,41 +523,41 @@ class LimsApi():
         return (cre, mouse_id)
     
     def get_fullfile_raw_path(self, sessions_id: int) -> str or None:
-    """
-    get_fullfile_raw_path returns filepath in windwos format to the raw tiff file containing unstitched fullfield stack
+        """
+        get_fullfile_raw_path returns filepath in windwos format to the raw tiff file containing unstitched fullfield stack
 
-    Parameters
-    ----------
-    sessions_id : int
-        LIMS sessions ID
+        Parameters
+        ----------
+        sessions_id : int
+            LIMS sessions ID
 
-    Returns
-    -------
-    str
-        path to file
-    """
-    
-    query = f"""SELECT 
-            os.id, 
-            os.storage_directory
-            FROM ophys_sessions os
-            WHERE os.id = '{session_id}'"""
-    #get sessions directory in lims
-    session_directory = pd.read_sql(query, lapi.lims_db.get_connection())['storage_directory'].values[0]
-    #reformat filepath for windwos:
-    session_directory = session_directory.replace('/', '\\')
-    session_directory = session_directory.replace('\\allen', '\\\\allen')
-    #get all files in sessions dir
-    files = os.listdir(session_directory)
-    #find file for fullfield stack
-    for index, file in enumerate(files):
-            if 'fullfield.tiff' in file:
-                file_index = index
-    #return paht if it exists, or None if not
-    try:
-        path = os.path.join(session_directory, files[file_index])
-    except:
-        path = None
-        print('No fullfield for '+str(session_id))
-    return path
+        Returns
+        -------
+        str
+            path to file
+        """
+        
+        query = f"""SELECT 
+                os.id, 
+                os.storage_directory
+                FROM ophys_sessions os
+                WHERE os.id = '{session_id}'"""
+        #get sessions directory in lims
+        session_directory = pd.read_sql(query, lapi.lims_db.get_connection())['storage_directory'].values[0]
+        #reformat filepath for windwos:
+        session_directory = session_directory.replace('/', '\\')
+        session_directory = session_directory.replace('\\allen', '\\\\allen')
+        #get all files in sessions dir
+        files = os.listdir(session_directory)
+        #find file for fullfield stack
+        for index, file in enumerate(files):
+                if 'fullfield.tiff' in file:
+                    file_index = index
+        #return paht if it exists, or None if not
+        try:
+            path = os.path.join(session_directory, files[file_index])
+        except:
+            path = None
+            print('No fullfield for '+str(session_id))
+        return path
 
