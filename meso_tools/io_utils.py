@@ -522,7 +522,7 @@ class LimsApi():
         mouse_id = line.split('-')[-1]
         return (cre, mouse_id)
     
-    def get_fullfile_raw_path(self, sessions_id: int) -> str or None:
+    def get_fullfield_raw_path(self, sessions_id: int) -> str or None:
         """
         get_fullfile_raw_path returns filepath in windwos format to the raw tiff file containing unstitched fullfield stack
 
