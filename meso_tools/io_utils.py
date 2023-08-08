@@ -560,3 +560,36 @@ class LimsApi():
             path = None
             print('No fullfield for '+str(session_id))
         return path
+    
+    def get_specimen_donor_ids_for_mouse_id(self, mouse_id : int) -> Tuple:
+        """
+        get_specimen_donor_ids_for_mouse_id
+        Returns a specimen id and a Donor ID for given Mouse ID via direct query to LIMS
+
+        Parameters
+        ----------
+        mouse_id : int
+            LIMS mouse_id
+
+        Returns
+        -------
+        Tuple 
+            tuple of two integers (specimen_id and donor_id)
+        """
+        
+        if (not session_id) and (not mouse_id) : 
+            raise TypeError("Either mouse_id or session_id should be provided")
+        
+        query = f"""SELECT 
+                    sp.external_specimen_name AS mouse_id, 
+                    sp.id AS specimen_id, 
+                    donors.id AS donor_id
+                    FROM ophys_sessions AS os
+                    JOIN specimens sp ON sp.id = os.specimen_id
+                    JOIN donors ON donors.id = sp.donor_id
+                    WHERE sp.external_specimen_name = '{mouse_id}'
+                """
+        lims_reply = pd.read_sql(query, lapi.lims_db.get_connection()).drop_duplicates()
+        specimen_id = lims_reply['specimen_id'].values[0]
+        donor_id = lims_reply['donor_id'].values[0]
+        return specimen_id, donor_id
