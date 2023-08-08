@@ -12,15 +12,15 @@ from typing import Tuple
 
 def read_tiff(path_to_tiff : str, page_num : int = None) -> np.array:
     """
-    Reads either entire tiff file, or if page_num is given, only those pages or pages range
+    Reads either entire tiff file, or if page_num is given, only those pages or range of pages
     Parameters
     -------
     path_to_tiff : str
         local path to the tiff file
     page_num : int or [int, int]
-        number of pages to read, if none provided will atempt to read entire tiff file.
+        Number of pages to read, if none provided will atempt to read entire tiff file.
         Will limlit to 5000 if tiff has more that 5000 pages.
-        if list of 2 ints, a range, - will read pages from the range
+        If list of 2 ints, a range, - will read pages from the range
     Returns
     -------
     tiff_array : np.array
@@ -97,7 +97,7 @@ def write_h5(path : str, h5_data : Any) -> None:
 
 def read_scanimage_metadata(path_to_tiff : str) -> dict:
     """
-    Read ScanImage metadata
+    Reads ScanImage metadata
     Parameters
     ----------
     path_to_tiff : str
@@ -106,7 +106,7 @@ def read_scanimage_metadata(path_to_tiff : str) -> dict:
     Returns
     -------
     meta_data : dict
-        disctionary with metadata
+        dictionary with metadata
     """
     meta_data = tifffile.read_scanimage_metadata(open(path_to_tiff, 'rb'))
     return meta_data
@@ -132,9 +132,9 @@ def load_motion_corrected_movie(filepath : str, page_num : list = None) -> np.ar
     Parameters
     ----------
     filepath : str
-        absolute path to teh hdf5 file with movie
+        absolute path to the hdf5 file with movie/timeseries
     page_num : list, optional
-        number of pages to load or tuple wiht range of images to load
+        number of pages to load or tuple with range of images to load
 
     Returns
     -------
@@ -158,7 +158,7 @@ def get_movie_shape(filepath : str) -> Tuple:
     Parameters
     ----------
     filepath : str
-        absolute path to teh hdf5 file with movie
+        absolute path to the hdf5 file with movie
     Returns
     -------
     movie_shape : Tuple
@@ -173,17 +173,17 @@ def get_movie_shape(filepath : str) -> Tuple:
 
 def read_scanimage_stack_metadata(metadata : dict) -> dict:
     """
-    read_scanimage_stack_metadata reads of the relevant metadata fields
+    read_scanimage_stack_metadata read only metadata relevant for a stack
 
     Parameters
     ----------
     metadata : dict
-        Dictionary that contains full ScanImage etadata dictionary 
+        Dictionary that contains full ScanImage metadata 
 
     Returns
     -------
     dict
-        stripped down dict wiht emetadata for stack only
+        stripped down dict with metadata for stack only
     """
     md_general = metadata[0]
     stack_metadata = {}
@@ -286,7 +286,7 @@ def read_plane_in_stack(stack_path : str, plane_num : int, slices : int) -> np.a
 
 class LimsApi():
     """
-    Class with simple queries to LIMS database, must have access to the credentials and read it prior to instantiating the class
+    Class with simple queries to LIMS database, must have access to the credentials and read it prior to instantiating 
     """
     def __init__(self, lims_credentials : dict):
         """
@@ -391,7 +391,7 @@ class LimsApi():
 
     def get_experiments_in_project(self, project : str) -> pd.DataFrame:
         """
-        Get all experiments, their deths and specimen name for given project code via a direct query to LIMS
+        Get all experiments, their deths and specimen names for given project code via a direct query to LIMS
         Parameters
         ----------
         project : str
@@ -458,7 +458,7 @@ class LimsApi():
 
     def get_roi_number_per_experiment(self, exp_id : int) -> int:
         """
-        Get number of segmenter ROIs given experiment ID via a direct query to LIMS
+        Get number of segmented ROIs given experiment ID via a direct query to LIMS
         Parameters
         ----------
         exp_id  : str
@@ -560,4 +560,3 @@ class LimsApi():
             path = None
             print('No fullfield for '+str(session_id))
         return path
-
