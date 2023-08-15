@@ -250,14 +250,14 @@ def append_suffix_to_filename(filename : str, suffix : str) -> str :
     Returns
     -------
     str
-        filename wihta ppended suffix
+        filename with appended suffix
     """
     basename = os.path.splitext(filename)[0]
     extension = os.path.splitext(filename)[1]
     return f"{basename}_{suffix}_{extension}"
 
 
-def read_plane_in_stack(stack_path : str, plane_num : int, slices : int) -> np.array :
+def read_plane_in_stack(stack_path : str, plane_num : int, slices : int, path_to_write: str) -> np.array :
     """
     read_plane_in_stack returns a timeseries corresponding to one plane fomr a stack with multiple repeats
 
@@ -279,9 +279,14 @@ def read_plane_in_stack(stack_path : str, plane_num : int, slices : int) -> np.a
         actual_repeats = np.divmod(tot_frames, slices)[0]
         pages_to_read = np.arange(plane_num, slices*actual_repeats+plane_num, slices)
         stack_plane = tiff.asarray(pages_to_read)
-
-    new_filepath = append_suffix_to_filename(stack_path, f'plane{plane_num}')
-    write_tiff(new_filepath, stack_plane)
+    if not path_to_write:
+        new_filepath = append_suffix_to_filename(stack_path, f'plane{plane_num}')
+        write_tiff(new_filepath, stack_plane)
+    else: 
+        if not os.path.isdir(path_to_write):
+            os.mkdir(path_to_write)
+        new_filepath = os.path.join(path_to_write, f'plane{plane_num}.tiff')
+        mt.io_utils.write_tiff(new_filepath, stack_plane)
     return stack_plane, actual_repeats
 
 class LimsApi():
