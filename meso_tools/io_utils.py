@@ -286,7 +286,7 @@ def read_plane_in_stack(stack_path : str, plane_num : int, slices : int, path_to
         if not os.path.isdir(path_to_write):
             os.mkdir(path_to_write)
         new_filepath = os.path.join(path_to_write, f'plane{plane_num}.tiff')
-        mt.io_utils.write_tiff(new_filepath, stack_plane)
+        write_tiff(new_filepath, stack_plane)
     return stack_plane, actual_repeats
 
 class LimsApi():
