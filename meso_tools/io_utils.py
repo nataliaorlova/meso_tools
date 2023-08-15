@@ -347,6 +347,25 @@ class LimsApi():
             return path
         else: print(f"Can't find folder for session {exp_id}")
         
+    def get_cortical_stacks(self, session_id : int) -> str:
+        """
+        get_cortical_stack return absolute path to cortical stacks found in session directory for given session_id
+
+        Parameters
+        ----------
+        session_id : int
+            Session ID assigned in LIMS
+
+        Returns
+        -------
+        str
+            list of path to cortical stacks
+        """
+        session_path = self.get_session_folder(session_id)
+        cortical_stacks = [item for item in os.listdir(session_path) if 'cortical_z_stack' in item]
+        cortical_stacks = [session_path + item for item in cortical_stacks]
+        return cortical_stacks
+        
             
     def get_motion_corrected_stack(self, exp_id : int) -> Union[str, None]:
         """
