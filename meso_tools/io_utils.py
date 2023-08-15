@@ -265,8 +265,8 @@ def read_plane_in_stack(stack_path : str, plane_num : int, slices : int) -> np.a
     ----------
     stack : str
         local path to stack
-    repeats : int
-        number of reepats of teh stak in np array
+    plane_num : int
+        plane to read from stack
     slices:
         number of planes in stack
     Returns
@@ -287,6 +287,7 @@ def read_plane_in_stack(stack_path : str, plane_num : int, slices : int) -> np.a
 class LimsApi():
     """
     Class with simple queries to LIMS database, must have access to the credentials and read it prior to instantiating 
+    The limst credentials dictionary should have following fields: 'dbname', 'user', 'host', 'password', 'port'
     """
     def __init__(self, lims_credentials : dict):
         """
@@ -321,6 +322,31 @@ class LimsApi():
             path = exp_folder_pd.experiment_folder[0]
             return path
         else: print(f"Can't find folder for experiment {exp_id}")
+        
+    def get_session_folder(self, session_id : int) -> str:
+        """
+        get_session_foled : Get path to the storage directory for given session id, via a direct query to LIMS
+
+        Parameters
+        ----------
+        session_id : int
+            Session ID assigned in LIMS
+
+        Returns
+        -------
+        str
+            path to session folder, if exists, or None
+        """
+        query = f"""SELECT
+            os.storage_directory as session_folder
+            FROM ophys_sessions os
+            WHERE os.id={session_id}"""
+        session_folder_pd = pd.read_sql(query, self.lims_db.get_connection())
+        if len(session_folder_pd) != 0:
+            path = session_folder_pd.session_folder[0]
+            return path
+        else: print(f"Can't find folder for session {exp_id}")
+        
             
     def get_motion_corrected_stack(self, exp_id : int) -> Union[str, None]:
         """
