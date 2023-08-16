@@ -29,11 +29,21 @@ from meso_tools.image_tools import image_negative_rescale, image_downsample
 import sciris as sc
 
 
-def read_full_field_meta(metadata):
+def read_full_field_stack_meta(metadata : dict) -> dict:
     """
-    reading of the relevant metadata fields
-    return: dict
+    read_full_field_meta : reads metadata relevant to stitching mROI stack data
+
+    Parameters
+    ----------
+    metadata : dict
+        full scanimage metadata dictionary
+
+    Returns
+    -------
+    dict
+        dictionary with only relevant fields
     """
+    
     md_general = metadata[0]  
     meta_dict = {}
     
@@ -50,6 +60,30 @@ def read_full_field_meta(metadata):
 
     #metadata related to specific rois/scanfields
     meta_dict['rois'] = metadata[1]['RoiGroups']['imagingRoiGroup']['rois']
+    return meta_dict
+
+def read_full_field_meta(metadata : dict) -> dict:
+    """
+    read_full_field_meta : reads metadata relevant to stitching mROI data
+
+    Parameters
+    ----------
+    metadata : dict
+        full scanimage metadata dictionary
+
+    Returns
+    -------
+    dict
+        dictionary with only relevant fields
+    """
+    md_general = metadata[0]  
+    meta_dict = {}
+    
+    meta_dict['channel_save'] = md_general['SI.hChannels.channelSave']
+
+    #metadata related to specific rois/scanfields
+    meta_dict['rois'] = metadata[1]['RoiGroups']['imagingRoiGroup']['rois']
+    
     return meta_dict
 
 def check_meta(meta_dict):
